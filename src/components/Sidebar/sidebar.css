@@ -1,0 +1,35 @@
+
+.sidebar {
+    width: 300px;
+    height: calc(100vh - 60px);
+    position: fixed;
+    top: 60px;
+    left: 0;
+    overflow-y: auto;
+    transition: all 0.3s;
+    z-index: 1020;
+  }
+  
+  .sidebar::-webkit-scrollbar {
+    width: 5px;
+  }
+  
+  .sidebar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  
+  .sidebar::-webkit-scrollbar-thumb {
+    background: #cfcfcf;
+    border-radius: 3px;
+  }
+  
+  @media (max-width: 992px) {
+    .sidebar {
+      width: 240px;
+      transform: translateX(-100%);
+    }
+    
+    .sidebar.show {
+      transform: translateX(0);
+    }
+  }
