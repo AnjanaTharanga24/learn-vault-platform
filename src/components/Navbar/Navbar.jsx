@@ -98,7 +98,7 @@ export default function Navbar() {
                   </Link>
                 </li>
                 <li className="nav-item ms-2">
-                  <Link className="btn btn-primary" to="/signup">
+                  <Link className="btn btn-primary" to="/register">
                     Sign Up
                   </Link>
                 </li>
