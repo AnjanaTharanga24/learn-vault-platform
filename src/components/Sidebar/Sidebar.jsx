@@ -27,35 +27,7 @@ export default function Sidebar() {
 
   return (
     <div className="sidebar bg-white shadow-sm">
-      <div className="user-profile p-3 border-bottom">
-        <div className="d-flex align-items-center mb-3">
-          <img 
-            src={profileImg} 
-            alt="Profile" 
-            className="rounded-circle me-3"
-            width={50}
-          />
-          <div>
-            <h6 className="mb-0">User</h6>
-            <small className="text-muted">username</small>
-          </div>
-        </div>
-        
-        <div className="d-flex justify-content-around text-center">
-          <div>
-            <div className="fw-bold">0</div>
-            <small className="text-muted">Posts</small>
-          </div>
-          <div>
-            <div className="fw-bold">0</div>
-            <small className="text-muted">Followers</small>
-          </div>
-          <div>
-            <div className="fw-bold"> 0</div>
-            <small className="text-muted">Following</small>
-          </div>
-        </div>
-      </div>
+     
       
       <div className="p-3 border-bottom">
         <h6 className="mb-3">My Learning Progress</h6>
