@@ -1,19 +1,84 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import './auth.css';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import "./auth.css";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 export default function Signup() {
-  const [birthdate, setBirthdate] = useState({
-    month: '',
-    day: '',
-    year: ''
+  const [userData, setUserData] = useState({
+    name: "",
+    username: "",
+    email: "",
+    password: "",
   });
-  
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const days = Array.from({ length: 31 }, (_, i) => i + 1);
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => currentYear - i);
-  
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUserData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const userRequest = {
+      name: `${userData.firstName} ${userData.lastName}`,
+      username: userData.username,
+      email: userData.email,
+      password: userData.password,
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/v1/user/register",
+        userRequest
+      );
+      console.log("User Registration Request:", response.data);
+      Swal.fire({
+        icon: "success",
+        title: "Registration Successful!",
+        text: "Your account has been created successfully.",
+        confirmButtonText: "Continue",
+        confirmButtonColor: "#3085d6",
+      });
+
+      setUserData({
+        firstName: "",
+        lastName: "",
+        username: "",
+        email: "",
+        password: "",
+      });
+    } catch (error) {
+      console.error("Complete Error Object:", error);
+      if (error.response) {
+        console.error("Backend Error Response:", error.response.data);
+
+        Swal.fire({
+          icon: "error",
+          title: "Registration Failed",
+          text:
+            error.response.data.message ||
+            "An error occurred during registration",
+          confirmButtonText: "Try Again",
+          confirmButtonColor: "#d33",
+        });
+      } else {
+        console.error("Error Setting Up Request:", error.message);
+
+        Swal.fire({
+          icon: "error",
+          title: "Unexpected Error",
+          text: "An unexpected error occurred. Please try again.",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#d33",
+        });
+      }
+    }
+  };
+
   return (
     <div className="fb-auth-container">
       <div className="fb-auth-content">
@@ -23,7 +88,7 @@ export default function Signup() {
             Connect with skilled people and share your expertise with the world
           </p>
         </div>
-        
+
         <div className="fb-form-section">
           <div className="fb-signup-card">
             <div className="fb-signup-header">
@@ -31,96 +96,71 @@ export default function Signup() {
               <p>It's quick and easy.</p>
             </div>
             <div className="fb-divider"></div>
-            
-            <form className="fb-form">
+
+            <form className="fb-form" onSubmit={handleSubmit}>
               <div className="fb-name-row">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
+                  name="firstName"
                   placeholder="First name"
+                  value={userData.firstName || ""}
+                  onChange={handleChange}
+                  required
                 />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
+                  name="lastName"
                   placeholder="Last name"
+                  value={userData.lastName || ""}
+                  onChange={handleChange}
+                  required
                 />
               </div>
-              
+
               <div className="fb-input-group">
-                <input 
-                  type="email" 
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="Username"
+                  value={userData.username || ""}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="fb-input-group">
+                <input
+                  type="email"
+                  name="email"
                   placeholder="Email address"
+                  value={userData.email || ""}
+                  onChange={handleChange}
+                  required
                 />
               </div>
-              
+
               <div className="fb-input-group">
-                <input 
-                  type="password" 
+                <input
+                  type="password"
+                  name="password"
                   placeholder="New password"
+                  value={userData.password || ""}
+                  onChange={handleChange}
+                  required
                 />
               </div>
-              
-              <div className="fb-birthday-section">
-                <label>Birthday</label>
-                <div className="fb-birthday-selects">
-                  <select 
-                    value={birthdate.month}
-                    onChange={(e) => setBirthdate({...birthdate, month: e.target.value})}
-                  >
-                    <option value="" disabled>Month</option>
-                    {months.map((month, index) => (
-                      <option key={month} value={index + 1}>{month}</option>
-                    ))}
-                  </select>
-                  
-                  <select 
-                    value={birthdate.day}
-                    onChange={(e) => setBirthdate({...birthdate, day: e.target.value})}
-                  >
-                    <option value="" disabled>Day</option>
-                    {days.map(day => (
-                      <option key={day} value={day}>{day}</option>
-                    ))}
-                  </select>
-                  
-                  <select 
-                    value={birthdate.year}
-                    onChange={(e) => setBirthdate({...birthdate, year: e.target.value})}
-                  >
-                    <option value="" disabled>Year</option>
-                    {years.map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              
-              <div className="fb-gender-section">
-                <label>Gender</label>
-                <div className="fb-gender-options">
-                  <label className="fb-radio-label">
-                    <input type="radio" name="gender" value="female" />
-                    <span>Female</span>
-                  </label>
-                  
-                  <label className="fb-radio-label">
-                    <input type="radio" name="gender" value="male" />
-                    <span>Male</span>
-                  </label>
-                  
-                  <label className="fb-radio-label">
-                    <input type="radio" name="gender" value="custom" />
-                    <span>Custom</span>
-                  </label>
-                </div>
-              </div>
-              
+
               <p className="fb-terms">
-                By clicking Sign Up, you agree to our <Link to="/terms">Terms</Link>, <Link to="/privacy">Privacy Policy</Link> and <Link to="/cookies">Cookies Policy</Link>.
+                By clicking Sign Up, you agree to our{" "}
+                <Link to="/terms">Terms</Link>,{" "}
+                <Link to="/privacy">Privacy Policy</Link> and{" "}
+                <Link to="/cookies">Cookies Policy</Link>.
               </p>
-              
+
               <button type="submit" className="fb-signup-btn">
                 Sign Up
               </button>
-              
+
               <div className="fb-login-link">
                 <Link to="/login">Already have an account?</Link>
               </div>
@@ -128,7 +168,7 @@ export default function Signup() {
           </div>
         </div>
       </div>
-      
+
       <footer className="fb-footer">
         <div className="fb-footer-content">
           <div className="fb-language">
