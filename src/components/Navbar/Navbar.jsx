@@ -5,7 +5,6 @@ import profileImg from "../../assets/images/profile.png";
 import { UserContext } from "../../common/UserContext";
 
 export default function Navbar() {
-  const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { user, logout } = useContext(UserContext);
 
@@ -75,6 +74,7 @@ export default function Navbar() {
                     href="#" 
                     role="button" 
                     data-bs-toggle="dropdown"
+                    aria-expanded="false"
                   >
                     <img 
                       src={user.profilePicture || profileImg}
