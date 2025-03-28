@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './auth.css';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { UserContext } from '../../common/UserContext';
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate()
+  const {setUser} = useContext(UserContext)
   const [loginData, setLoginData] = useState({
     username: "",
     password: ""
@@ -42,7 +44,7 @@ export default function Login() {
         username: loginData.username,
         password: loginData.password
       });
-
+     setUser(response.data)
     console.log('login response:',response.data)
       Swal.fire({
         icon: 'success',
