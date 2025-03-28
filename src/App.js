@@ -4,9 +4,11 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home/Home';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
+import { UserProvider } from './common/UserContext';
 
 function App() {
   return (
+    <UserProvider>
     <div className="App">
       <Router>
         <Routes>
@@ -16,6 +18,7 @@ function App() {
         </Routes>
       </Router>
     </div>
+    </UserProvider>
   );
 }
 

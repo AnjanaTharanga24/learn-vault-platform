@@ -1,42 +1,19 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import "./navbar.css";
 import { Link } from "react-router-dom";
 import profileImg from "../../assets/images/profile.png";
+import { UserContext } from "../../common/UserContext";
 
 export default function Navbar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Mock notifications - would come from your API in production
-  const notifications = [
-    {
-      id: 1,
-      type: "like",
-      username: "JaneDoe",
-      content: "liked your post about JavaScript basics",
-      time: "5m ago",
-    },
-    {
-      id: 2,
-      type: "comment",
-      username: "JohnSmith",
-      content: "commented on your photography skills post",
-      time: "20m ago",
-    },
-    {
-      id: 3,
-      type: "follow",
-      username: "MikeJohnson",
-      content: "started following you",
-      time: "1h ago",
-    },
-  ];
+  const { user, logout } = useContext(UserContext);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle search functionality
     console.log("Searching for:", searchQuery);
   };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
       <div className="container-fluid">
@@ -90,77 +67,55 @@ export default function Navbar() {
               </Link>
             </li>
 
-            <li className="nav-item px-2 dropdown">
-              <div className="d-flex">
-                <li className="nav-item ms-2">
-                  <Link className="btn btn-outline-primary" to="/login">
-                    Login
-                  </Link>
-                </li>
-                <li className="nav-item ms-2">
-                  <Link className="btn btn-primary" to="/register">
-                    Sign Up
-                  </Link>
-                </li>
-              </div>
-              {/* <a 
-                className="nav-link position-relative" 
-                href="#" 
-                role="button" 
-                onClick={() => setShowNotifications(!showNotifications)}
-              >
-                <i className="fas fa-bell fs-4"></i>
-                {notifications.length > 0 && (
-                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                    {notifications.length}
-                  </span>
-                )}
-              </a> */}
-
-              {/* Notifications dropdown */}
-              {/* {showNotifications && (
-                <div className="dropdown-menu notification-dropdown shadow show">
-                  <h6 className="dropdown-header">Notifications</h6>
-                  {notifications.map(notification => (
-                    <a key={notification.id} className="dropdown-item notification-item" href="#">
-                      <div className="d-flex align-items-center">
-                        <div className="notification-icon me-3">
-                          {notification.type === 'like' && <i className="fas fa-heart text-danger"></i>}
-                          {notification.type === 'comment' && <i className="fas fa-comment text-primary"></i>}
-                          {notification.type === 'follow' && <i className="fas fa-user-plus text-success"></i>}
-                        </div>
-                        <div className="notification-content">
-                          <p className="mb-0"><strong>{notification.username}</strong> {notification.content}</p>
-                          <small className="text-muted">{notification.time}</small>
-                        </div>
-                      </div>
-                    </a>
-                  ))}
-                  <div className="dropdown-divider"></div>
-                  <a className="dropdown-item text-center" href="#">See all notifications</a>
+            <li className="nav-item px-2">
+              {user ? (
+                <div className="dropdown">
+                  <a 
+                    className="nav-link dropdown-toggle d-flex align-items-center" 
+                    href="#" 
+                    role="button" 
+                    data-bs-toggle="dropdown"
+                  >
+                    <img 
+                      src={user.profilePicture || profileImg}
+                      alt="Profile" 
+                      className="rounded-circle me-md-2" 
+                      width="32" 
+                      height="32" 
+                    />
+                    <span className="d-none d-md-block">
+                      {user.username || 'User'}
+                    </span>
+                  </a>
+                  <ul className="dropdown-menu dropdown-menu-end shadow">
+                    <li><Link className="dropdown-item" to="/profile">My Profile</Link></li>
+                    <li><Link className="dropdown-item" to="/settings">Settings</Link></li>
+                    <li><hr className="dropdown-divider" /></li>
+                    <li>
+                      <button 
+                        className="dropdown-item" 
+                        onClick={logout}
+                      >
+                        Logout
+                      </button>
+                    </li>
+                  </ul>
                 </div>
-              )} */}
+              ) : (
+                <div className="d-flex">
+                  <li className="nav-item ms-2">
+                    <Link className="btn btn-outline-primary" to="/login">
+                      Login
+                    </Link>
+                  </li>
+                  <li className="nav-item ms-2">
+                    <Link className="btn btn-primary" to="/register">
+                      Sign Up
+                    </Link>
+                  </li>
+                </div>
+              )}
             </li>
-
-            {/* User profile */}
-            {/* <li className="nav-item px-2 dropdown">
-              <a className="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                <img 
-                  src={profileImg}
-                  alt="Profile" 
-                  className="rounded-circle me-md-2" 
-                  width="32" 
-                  height="32" 
-                />
-                <span className="d-none d-md-block">User</span>
-              </a>
-              <ul className="dropdown-menu dropdown-menu-end shadow">
-                <li><Link className="dropdown-item" to="/profile">My Profile</Link></li>
-                <li><Link className="dropdown-item" to="/settings">Settings</Link></li>
-                <li><hr className="dropdown-divider" /></li>
-                <li><Link className="dropdown-item" to="/logout">Logout</Link></li>
-              </ul>
-            </li> */}
           </ul>
         </div>
       </div>
