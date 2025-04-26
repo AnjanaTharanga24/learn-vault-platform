@@ -57,7 +57,7 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8080/api/v1/user/login",
+        "http://localhost:8083/api/v1/user/login",
         {
           username: loginData.username,
           password: loginData.password,
@@ -98,7 +98,60 @@ export default function Login() {
     const provider = new GoogleAuthProvider();
 
     signInWithPopup(auth, provider).then(async (result) => {
-      console.log("result", result.user);
+      try {
+        const response = await axios.post(
+          "http://localhost:8083/api/v1/user/login-or-signup-by-oauth",
+          {
+            name: result.user.displayName,
+            email: result.user.email,
+            imgUrl: result.user.photoURL,
+            providerId: result.user.providerId,
+          }
+        );
+        setUser(response.data);
+        console.log(response.data);
+
+        if (response.data.userType === "active_user") {
+          Swal.fire({
+            icon: "success",
+            title: "Login Successful!",
+            text: "Welcome back to SkillShare!",
+            customClass: {
+              popup: "fb-swal-popup",
+            },
+            showConfirmButton: false,
+            timer: 2000,
+          }).then(() => {
+            navigate("/");
+          });
+        } else if (response.data.userType === "new_user") {
+          Swal.fire({
+            icon: "success",
+            title: "Welcome to Skill Sharing Application!",
+            text: "Let's get started with SkillShare!",
+            customClass: {
+              popup: "fb-swal-popup",
+            },
+            showConfirmButton: false,
+            timer: 2000,
+          }).then(() => {
+            navigate("/");
+          });
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text:
+            error.response?.data?.message ||
+            "Unable to login. Please try again.",
+          customClass: {
+            popup: "fb-swal-popup",
+          },
+          showConfirmButton: false,
+          timer: 2000,
+        });
+      }
     });
   };
 
