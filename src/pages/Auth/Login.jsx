@@ -7,6 +7,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { UserContext } from "../../common/UserContext";
 import googleIcon from "../../assets/images/google.png";
+import {
+  GoogleAuthProvider,
+  FacebookAuthProvider,
+  signInWithPopup,
+  OAuthProvider,
+  getAuth,
+} from "firebase/auth";
+import { auth } from "../../components/utils/firebase.js";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +24,13 @@ export default function Login() {
     username: "",
     password: "",
   });
+  const [open, setOpen] = useState(false);
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleOpen = () => {
+    setOpen(true);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -77,7 +92,15 @@ export default function Login() {
     }
   };
 
-  const handleGoogleLogin = async (e) => {};
+  const handleGoogleLoginOrSignUp = async (e) => {
+    e.preventDefault();
+    handleOpen();
+    const provider = new GoogleAuthProvider();
+
+    signInWithPopup(auth, provider).then(async (result) => {
+      console.log("result", result.user);
+    });
+  };
 
   return (
     <div className="fb-auth-container">
@@ -124,8 +147,11 @@ export default function Login() {
               </button>
             </form>
 
-            <button className="google-login-btn" onClick={handleGoogleLogin}>
-              <span>Countinue with Google</span>
+            <button
+              className="google-login-btn"
+              onClick={handleGoogleLoginOrSignUp}
+            >
+              <span>Continue with Google</span>
               <img src={googleIcon} alt="google" />
             </button>
 
