@@ -37,6 +37,7 @@ export default function Home() {
                     placeholder={`What's on your mind, ${
                       user.username || "User"
                     }?`}
+                    onClick={() => setShowPostModal(true)}
                   />
                 </div>
                 <div className="d-flex justify-content-between p-3">
@@ -66,7 +67,6 @@ export default function Home() {
           <Sidebar2 />
         </div>
       </div>
-
       <SkillSharingPostModal
         show={showPostModal}
         handleClose={() => setShowPostModal(false)}

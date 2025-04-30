@@ -57,7 +57,7 @@ export default function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost:8083/api/v1/user/login",
+        "http://localhost:8080/api/v1/user/login",
         {
           username: loginData.username,
           password: loginData.password,
