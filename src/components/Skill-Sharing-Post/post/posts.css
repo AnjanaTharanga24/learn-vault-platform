@@ -259,3 +259,44 @@
       max-height: calc(90vh - 60px);
     }
   }
+/* Top-right corner buttons */
+.posts__icon-image {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.posts__edit-buttons {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+}
+.posts__icon-btn {
+  width: 36px;
+  height: 36px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.posts__icon-btn.delete {
+  border-color: #dc3545;
+}
+
+/* Ensure posts__card is positioned relatively */
+.posts__card {
+  position: relative;
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
