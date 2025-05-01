@@ -7,10 +7,14 @@ import profileImg from "../../assets/images/profile.png";
 import SkillSharingPostModal from "../../components/Skill-Sharing-Post/modal/SkillSharingPostModal";
 import Posts from "../../components/Skill-Sharing-Post/post/Posts";
 import "./home.css";
+import LearningPlanModal from "../../components/Learning-Plan-Post/modal/LearningPlanModal";
+import LearningProgressModal from "../../components/Learning-Progress-Post/Form/LearningProgressFrom";
 
 export default function Home() {
   const { user } = useContext(UserContext);
   const [showPostModal, setShowPostModal] = useState(false);
+  const [showLearningPostModal, setShowLearningPostModal] = useState(false);
+  const [showLearningProgressPostModal, setShowLearningProgressPostModal] = useState(false);
 
   return (
     <div className="container-fluid p-0">
@@ -41,7 +45,9 @@ export default function Home() {
                   />
                 </div>
                 <div className="d-flex justify-content-between p-3">
-                  <button className="btn btn-outline-secondary d-flex align-items-center">
+                  <button className="btn btn-outline-secondary d-flex align-items-center"
+                  onClick={() => setShowLearningProgressPostModal(true)}
+                  >
                     <i className="fas fa-chart-line text-danger me-2"></i>
                     Learning Progress
                   </button>
@@ -52,7 +58,9 @@ export default function Home() {
                     <i className="fas fa-lightbulb text-success me-2"></i>
                     Skill Sharing Post
                   </button>
-                  <button className="btn btn-outline-secondary d-flex align-items-center">
+                  <button className="btn btn-outline-secondary d-flex align-items-center"
+                  onClick={() => setShowLearningPostModal(true)}
+                  >
                     <i className="fas fa-tasks text-warning me-2"></i>
                     Learning Plan
                   </button>
@@ -71,6 +79,8 @@ export default function Home() {
         show={showPostModal}
         handleClose={() => setShowPostModal(false)}
       />
+      <LearningPlanModal show={showLearningPostModal} handleClose={() => setShowLearningPostModal(false)}/>
+        <LearningProgressModal show={showLearningProgressPostModal} handleClose={() => setShowLearningProgressPostModal(false)}/>
     </div>
   );
 }

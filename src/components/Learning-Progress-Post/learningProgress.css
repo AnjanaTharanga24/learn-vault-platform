@@ -1,0 +1,204 @@
+/* Learning Progress Container Styles */
+.progress-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  /* Progress Card Styles */
+  .progress-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  
+  .progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    border-bottom: 1px solid #f0f2f5;
+  }
+  
+  .progress-profile-pic {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 12px;
+    object-fit: cover;
+  }
+  
+  .progress-user-name {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  
+  .progress-meta {
+    color: #65676B;
+    font-size: 13px;
+  }
+  
+  .progress-actions button {
+    color: #65676B;
+    background: none;
+    border: none;
+    padding: 5px;
+  }
+  
+  .progress-body {
+    padding: 15px;
+  }
+  
+  .progress-skill-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .progress-skill {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .progress-level {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .badge-beginner {
+    background-color: #e9f5fe;
+    color: #0077cc;
+  }
+  
+  .badge-intermediate {
+    background-color: #e9f9e6;
+    color: #28a745;
+  }
+  
+  .badge-advanced {
+    background-color: #fff5e6;
+    color: #ff9900;
+  }
+  
+  .badge-expert {
+    background-color: #feebf4;
+    color: #d6336c;
+  }
+  
+  .progress-description {
+    margin-bottom: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #050505;
+  }
+  
+  /* Progress Detail Page Styles */
+  .progress-detail-container {
+    max-width: 768px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .progress-detail-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  
+  .progress-detail-header {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .progress-detail-body {
+    padding: 20px;
+  }
+  
+  .progress-skill-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  
+  .progress-detail-section {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .progress-detail-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+  
+  .progress-detail-section h5 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .progress-milestones {
+    padding-left: 10px;
+  }
+  
+  .progress-milestone {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+  }
+  
+  .milestone-icon {
+    background-color: #f0f7ff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: #0077cc;
+  }
+  
+  .milestone-content {
+    flex: 1;
+  }
+  
+  .milestone-content h6 {
+    margin-bottom: 5px;
+    font-weight: 600;
+  }
+  
+  /* Empty State Styles */
+  .progress-empty-state {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 30px;
+  }
+  
+  .progress-empty-state i {
+    color: #ccc;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .progress-skill-info {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    
+    .progress-level {
+      align-self: flex-start;
+    }
+  }
