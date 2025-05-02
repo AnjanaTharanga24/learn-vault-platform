@@ -10,6 +10,7 @@ import "./home.css";
 import LearningPlanModal from "../../components/Learning-Plan-Post/modal/LearningPlanModal";
 import LearningProgressModal from "../../components/Learning-Progress-Post/Form/LearningProgressFrom";
 import LearningProgressPosts from "../../components/Learning-Progress-Post/post/LearningProgressPosts";
+import LearningPlanPosts from "../../components/Learning-Plan-Post/post/LearningPlanPosts";
 
 export default function Home() {
   const { user } = useContext(UserContext);
@@ -71,6 +72,7 @@ export default function Home() {
 
             <Posts />
             <LearningProgressPosts/>
+            <LearningPlanPosts/>
           </div>
         </div>
         <div className="col-lg-2">
