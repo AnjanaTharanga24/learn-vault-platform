@@ -2,117 +2,170 @@ import React, { useState, useContext } from 'react';
 import { Modal } from 'react-bootstrap';
 import { UserContext } from '../../../common/UserContext';
 import profileImg from '../../../assets/images/profile.png';
-import DatePicker from 'react-datepicker'; // Make sure to install: npm install react-datepicker
+import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
-export default function LearningPlanModal({ show, handleClose }) {
+export default function LearningPlanModal({ show, handleClose, onSuccess }) {
   const { user } = useContext(UserContext);
-  const [title, setTitle] = useState('');
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date(new Date().setMonth(new Date().getMonth() + 1)));
-  const [topics, setTopics] = useState(['']);
-  const [resources, setResources] = useState(['']);
-  const [status, setStatus] = useState('NOT_STARTED'); // Options: NOT_STARTED, IN_PROGRESS, COMPLETED
+  const [formData, setFormData] = useState({
+    title: '',
+    topics: [''],
+    resources: [''],
+    startDate: new Date(),
+    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+    status: 'NOT_STARTED'
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const statusOptions = [
+    { value: 'NOT_STARTED', label: 'Not Started' },
+    { value: 'IN_PROGRESS', label: 'In Progress' },
+    { value: 'COMPLETED', label: 'Completed' }
+  ];
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleDateChange = (name, date) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: date
+    }));
+  };
 
   const handleTopicChange = (index, value) => {
-    const newTopics = [...topics];
+    const newTopics = [...formData.topics];
     newTopics[index] = value;
-    setTopics(newTopics);
+    setFormData(prev => ({
+      ...prev,
+      topics: newTopics
+    }));
   };
 
   const addTopic = () => {
-    setTopics([...topics, '']);
+    setFormData(prev => ({
+      ...prev,
+      topics: [...prev.topics, '']
+    }));
   };
 
   const removeTopic = (index) => {
-    const newTopics = [...topics];
+    const newTopics = [...formData.topics];
     newTopics.splice(index, 1);
-    setTopics(newTopics);
+    setFormData(prev => ({
+      ...prev,
+      topics: newTopics
+    }));
   };
 
   const handleResourceChange = (index, value) => {
-    const newResources = [...resources];
+    const newResources = [...formData.resources];
     newResources[index] = value;
-    setResources(newResources);
+    setFormData(prev => ({
+      ...prev,
+      resources: newResources
+    }));
   };
 
   const addResource = () => {
-    setResources([...resources, '']);
+    setFormData(prev => ({
+      ...prev,
+      resources: [...prev.resources, '']
+    }));
   };
 
   const removeResource = (index) => {
-    const newResources = [...resources];
+    const newResources = [...formData.resources];
     newResources.splice(index, 1);
-    setResources(newResources);
+    setFormData(prev => ({
+      ...prev,
+      resources: newResources
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setLoading(true);
+    setError('');
+
     // Filter out empty topics and resources
-    const filteredTopics = topics.filter(topic => topic.trim() !== '');
-    const filteredResources = resources.filter(resource => resource.trim() !== '');
-    
-    const learningPlanData = {
-      userId: user?.id,
-      title,
-      topics: filteredTopics,
-      resources: filteredResources,
-      startDate,
-      endDate,
-      status
-    };
-    
+    const filteredTopics = formData.topics.filter(topic => topic.trim() !== '');
+    const filteredResources = formData.resources.filter(resource => resource.trim() !== '');
+
+    if (!formData.title || filteredTopics.length === 0 || filteredResources.length === 0) {
+      setError('Please fill in all required fields');
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Replace with your API endpoint and implementation
-      const response = await fetch('/api/learning-plans', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const learningPlanRequest = {
+        userId: user?.id,
+        title: formData.title,
+        topics: filteredTopics,
+        resources: filteredResources,
+        startDate: formData.startDate.toISOString().split('T')[0],
+        endDate: formData.endDate.toISOString().split('T')[0],
+        status: formData.status
+      };
+
+      const response = await axios.post('http://localhost:8080/api/v1/learning/plans', learningPlanRequest);
+      console.log('Learning Plan:', response.data);
+      resetForm();
+      handleClose();
+      Swal.fire({
+        icon: "success",
+        title: "Learning Plan Created Successfully!",
+        customClass: {
+          popup: "fb-swal-popup",
         },
-        body: JSON.stringify(learningPlanData),
+        showConfirmButton: false,
+        timer: 2000,
       });
-      
-      if (response.ok) {
-        // Reset form and close modal
-        resetForm();
-        handleClose();
-        // You might want to trigger a refresh of the learning plans list
-      } else {
-        const errorData = await response.json();
-        console.error('Failed to create learning plan:', errorData);
-        alert('Failed to create learning plan. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error creating learning plan:', error);
-      alert('An error occurred. Please try again.');
+      if (onSuccess) onSuccess();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to create learning plan. Please try again.');
+      console.error('Error creating learning plan:', err);
+    } finally {
+      setLoading(false);
     }
   };
-  
+
   const resetForm = () => {
-    setTitle('');
-    setStartDate(new Date());
-    setEndDate(new Date(new Date().setMonth(new Date().getMonth() + 1)));
-    setTopics(['']);
-    setResources(['']);
-    setStatus('NOT_STARTED');
+    setFormData({
+      title: '',
+      topics: [''],
+      resources: [''],
+      startDate: new Date(),
+      endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+      status: 'NOT_STARTED'
+    });
+    setError('');
   };
 
   const isFormValid = () => {
     return (
-      title.trim() !== '' && 
-      topics.some(topic => topic.trim() !== '') &&
-      resources.some(resource => resource.trim() !== '') &&
-      startDate && 
-      endDate && 
-      new Date(endDate) >= new Date(startDate)
+      formData.title.trim() !== '' &&
+      formData.topics.some(topic => topic.trim() !== '') &&
+      formData.resources.some(resource => resource.trim() !== '') &&
+      formData.startDate &&
+      formData.endDate &&
+      new Date(formData.endDate) >= new Date(formData.startDate)
     );
   };
 
   return (
     <Modal show={show} onHide={handleClose} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>Create a Learning Plan</Modal.Title>
+        <Modal.Title>Create Learning Plan</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="d-flex align-items-center bg-light p-3 mb-3">
@@ -126,6 +179,12 @@ export default function LearningPlanModal({ show, handleClose }) {
           <span className="fw-bold">{user?.username || 'User'}</span>
         </div>
         
+        {error && (
+          <div className="alert alert-danger" role="alert">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label htmlFor="title" className="form-label">Title</label>
@@ -133,17 +192,17 @@ export default function LearningPlanModal({ show, handleClose }) {
               type="text"
               className="form-control"
               id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
               placeholder="Enter a title for your learning plan"
               required
             />
           </div>
           
-          {/* Topics Section */}
           <div className="mb-3">
             <label className="form-label">Topics to Learn</label>
-            {topics.map((topic, index) => (
+            {formData.topics.map((topic, index) => (
               <div key={`topic-${index}`} className="input-group mb-2">
                 <input
                   type="text"
@@ -151,12 +210,13 @@ export default function LearningPlanModal({ show, handleClose }) {
                   value={topic}
                   onChange={(e) => handleTopicChange(index, e.target.value)}
                   placeholder="e.g., JavaScript Basics, React Hooks"
+                  required={index === 0}
                 />
                 <button
                   type="button"
                   className="btn btn-outline-danger"
                   onClick={() => removeTopic(index)}
-                  disabled={topics.length === 1}
+                  disabled={formData.topics.length === 1}
                 >
                   <i className="fas fa-trash"></i>
                 </button>
@@ -171,10 +231,9 @@ export default function LearningPlanModal({ show, handleClose }) {
             </button>
           </div>
           
-          {/* Resources Section */}
           <div className="mb-3">
             <label className="form-label">Learning Resources</label>
-            {resources.map((resource, index) => (
+            {formData.resources.map((resource, index) => (
               <div key={`resource-${index}`} className="input-group mb-2">
                 <input
                   type="text"
@@ -182,12 +241,13 @@ export default function LearningPlanModal({ show, handleClose }) {
                   value={resource}
                   onChange={(e) => handleResourceChange(index, e.target.value)}
                   placeholder="e.g., Udemy Course URL, Book Title, YouTube Tutorial"
+                  required={index === 0}
                 />
                 <button
                   type="button"
                   className="btn btn-outline-danger"
                   onClick={() => removeResource(index)}
-                  disabled={resources.length === 1}
+                  disabled={formData.resources.length === 1}
                 >
                   <i className="fas fa-trash"></i>
                 </button>
@@ -202,13 +262,12 @@ export default function LearningPlanModal({ show, handleClose }) {
             </button>
           </div>
           
-          {/* Date Range */}
           <div className="row mb-3">
             <div className="col-md-6">
               <label htmlFor="startDate" className="form-label">Start Date</label>
               <DatePicker
-                selected={startDate}
-                onChange={date => setStartDate(date)}
+                selected={formData.startDate}
+                onChange={date => handleDateChange('startDate', date)}
                 className="form-control"
                 dateFormat="yyyy-MM-dd"
                 id="startDate"
@@ -217,28 +276,30 @@ export default function LearningPlanModal({ show, handleClose }) {
             <div className="col-md-6">
               <label htmlFor="endDate" className="form-label">Target End Date</label>
               <DatePicker
-                selected={endDate}
-                onChange={date => setEndDate(date)}
+                selected={formData.endDate}
+                onChange={date => handleDateChange('endDate', date)}
                 className="form-control"
                 dateFormat="yyyy-MM-dd"
                 id="endDate"
-                minDate={startDate}
+                minDate={formData.startDate}
               />
             </div>
           </div>
           
-          {/* Status Selection */}
           <div className="mb-3">
             <label htmlFor="status" className="form-label">Status</label>
             <select
               className="form-select"
               id="status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
             >
-              <option value="NOT_STARTED">Not Started</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="COMPLETED">Completed</option>
+              {statusOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
         </form>
@@ -247,15 +308,16 @@ export default function LearningPlanModal({ show, handleClose }) {
         <button 
           className="btn btn-secondary me-2" 
           onClick={handleClose}
+          disabled={loading}
         >
           Cancel
         </button>
         <button 
           className="btn btn-primary"
           onClick={handleSubmit}
-          disabled={!isFormValid()}
+          disabled={loading || !isFormValid()}
         >
-          Create Learning Plan
+          {loading ? 'Creating...' : 'Create Plan'}
         </button>
       </Modal.Footer>
     </Modal>
