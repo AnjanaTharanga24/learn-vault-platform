@@ -9,6 +9,7 @@ import Posts from "../../components/Skill-Sharing-Post/post/Posts";
 import "./home.css";
 import LearningPlanModal from "../../components/Learning-Plan-Post/modal/LearningPlanModal";
 import LearningProgressModal from "../../components/Learning-Progress-Post/Form/LearningProgressFrom";
+import LearningProgressPosts from "../../components/Learning-Progress-Post/post/LearningProgressPosts";
 
 export default function Home() {
   const { user } = useContext(UserContext);
@@ -69,6 +70,7 @@ export default function Home() {
             )}
 
             <Posts />
+            <LearningProgressPosts/>
           </div>
         </div>
         <div className="col-lg-2">
