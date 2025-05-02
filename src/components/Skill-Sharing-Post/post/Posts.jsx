@@ -3,73 +3,33 @@ import profileImg from '../../../assets/images/profile.png';
 import './posts.css';
 import editIcon from '../../../assets/images/edit.png';
 import deleteIcon from '../../../assets/images/delete.png';
-import { uploadToCloudinary } from '../../utils/uploadToCloudinary';
-
-const mockPosts = [
-  {
-    id: 1,
-    user: {
-      name: 'John Doe',
-      profile: profileImg
-    },
-    skill: 'Web Development',
-    description: 'Check out my project demo video and screenshots from my React learning journey!',
-    images: [
-      'https://t4.ftcdn.net/jpg/02/92/83/57/360_F_292835773_oImixQGFKLpOPnjfsbesHyqdjOk5hsxL.jpg',
-      'https://t3.ftcdn.net/jpg/04/51/12/88/360_F_451128839_vmKOyil368UoXcac46W7aaqelTtLuNFk.jpg',
-      'https://inside.java/images/java-logo-vert-blk.png'
-    ],
-    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    likes: 42,
-    comments: 7,
-    timestamp: '2 hours ago'
-  },
-  {
-    id: 1,
-    user: {
-      name: 'John Doe',
-      profile: profileImg
-    },
-    skill: 'Web Development',
-    description: 'Check out my project demo video and screenshots from my React learning journey!',
-    images: [
-      'https://t4.ftcdn.net/jpg/02/92/83/57/360_F_292835773_oImixQGFKLpOPnjfsbesHyqdjOk5hsxL.jpg',
-      'https://t3.ftcdn.net/jpg/04/51/12/88/360_F_451128839_vmKOyil368UoXcac46W7aaqelTtLuNFk.jpg',
-      'https://inside.java/images/java-logo-vert-blk.png'
-    ],
-    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    likes: 42,
-    comments: 7,
-    timestamp: '2 hours ago'
-  },
-  {
-    id: 1,
-    user: {
-      name: 'John Doe',
-      profile: profileImg
-    },
-    skill: 'Web Development',
-    description: 'Check out my project demo video and screenshots from my React learning journey!',
-    images: [
-      'https://t4.ftcdn.net/jpg/02/92/83/57/360_F_292835773_oImixQGFKLpOPnjfsbesHyqdjOk5hsxL.jpg',
-      'https://t3.ftcdn.net/jpg/04/51/12/88/360_F_451128839_vmKOyil368UoXcac46W7aaqelTtLuNFk.jpg',
-      'https://inside.java/images/java-logo-vert-blk.png'
-    ],
-    video: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-    likes: 42,
-    comments: 7,
-    timestamp: '2 hours ago'
-  }
-];
+import axios from 'axios';
 
 export default function Posts({ editable = false }) {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [currentPostMedia, setCurrentPostMedia] = useState([]);
 
+  const API_BASE_URL = 'http://localhost:8080/api/v1/'; 
+
   useEffect(() => {
-    setPosts(mockPosts);
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(API_BASE_URL + 'feed');
+        setPosts(response.data);
+      } catch (err) {
+        console.error('Error fetching posts:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
   }, []);
 
   const isVideo = (url) => {
@@ -79,8 +39,8 @@ export default function Posts({ editable = false }) {
 
   const handleMediaClick = (post, index) => {
     const mediaItems = [
-      ...(post.video ? [post.video] : []),
-      ...(post.images || [])
+      ...(post.videoUrl ? [post.videoUrl] : []),
+      ...(post.imageUrls || [])
     ];
     setCurrentPostMedia(mediaItems);
     setCurrentMediaIndex(index);
@@ -95,28 +55,28 @@ export default function Posts({ editable = false }) {
     setCurrentMediaIndex(prev => (prev < currentPostMedia.length - 1 ? prev + 1 : 0));
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (postId) => {
     if (window.confirm('Are you sure you want to delete this post?')) {
-      setPosts(prev => prev.filter(post => post.id !== id));
+      try {
+        await axios.delete(`${API_BASE_URL}/${postId}`, {
+          data: { userId: 'current-user-id' }
+        });
+        setPosts(prev => prev.filter(post => post.postId !== postId));
+      } catch (err) {
+        console.error('Error deleting post:', err);
+        alert('Failed to delete post');
+      }
     }
   };
 
-  //Handle image upload
-  const handleImageUpload = async (event) => {
-    const imageUrl = await uploadToCloudinary(event.target.files[0], "image");
-    setSelectedImage(imageUrl);
-    setIsLoading(false);
-    // formik.setFieldValue("image", imageUrl);
-  };
-
-  const handleUpdate = (id) => {
-    alert(`Update post ${id} (connect to modal/form if needed)`);
+  const handleUpdate = (postId) => {
+    alert(`Update post ${postId} (connect to modal/form if needed)`);
   };
 
   const renderPostMedia = (post) => {
     const mediaItems = [
-      ...(post.video ? [post.video] : []),
-      ...(post.images || []).slice(0, 3)
+      ...(post.videoUrl ? [post.videoUrl] : []),
+      ...(post.imageUrls || []).slice(0, 3)
     ];
 
     if (mediaItems.length === 0) return null;
@@ -135,50 +95,68 @@ export default function Posts({ editable = false }) {
             <img src={mediaItems[0]} alt="Main media" className="posts__media-element" />
           )}
         </div>
-        <div className="posts__secondary-media-container">
-          {mediaItems.slice(1, 4).map((media, index) => (
-            <div
-              key={index}
-              className="posts__secondary-media-item"
-              onClick={() => handleMediaClick(post, index + 1)}
-            >
-              {isVideo(media) ? (
-                <div className="posts__video-container">
-                  <video className="posts__media-element" playsInline muted preload="metadata">
-                    <source src={media} type="video/mp4" />
-                  </video>
-                  <div className="posts__play-icon">▶</div>
-                </div>
-              ) : (
-                <img src={media} alt={`Screenshot ${index + 1}`} className="posts__media-element" />
-              )}
-            </div>
-          ))}
-        </div>
+        {mediaItems.length > 1 && (
+          <div className="posts__secondary-media-container">
+            {mediaItems.slice(1, 4).map((media, index) => (
+              <div
+                key={index}
+                className="posts__secondary-media-item"
+                onClick={() => handleMediaClick(post, index + 1)}
+              >
+                {isVideo(media) ? (
+                  <div className="posts__video-container">
+                    <video className="posts__media-element" playsInline muted preload="metadata">
+                      <source src={media} type="video/mp4" />
+                    </video>
+                    <div className="posts__play-icon">▶</div>
+                  </div>
+                ) : (
+                  <img src={media} alt={`Screenshot ${index + 1}`} className="posts__media-element" />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
 
+  if (loading) {
+    return <div className="posts__loading">Loading posts...</div>;
+  }
+
+  if (error) {
+    return <div className="posts__error">Error: {error}</div>;
+  }
+
+  if (posts.length === 0) {
+    return <div className="posts__empty">No posts to display</div>;
+  }
+
   return (
     <div className="posts__container">
       {posts.map(post => (
-        <div key={post.id} className="posts__card">
+        <div key={post.postId} className="posts__card">
           {editable && (
             <div className="posts__edit-buttons">
-              <button onClick={() => handleUpdate(post.id)} className="posts__icon-btn">
+              <button onClick={() => handleUpdate(post.postId)} className="posts__icon-btn">
                 <img src={editIcon} alt="Edit" className="posts__icon-image" />
               </button>
-              <button onClick={() => handleDelete(post.id)} className="posts__icon-btn delete">
+              <button onClick={() => handleDelete(post.postId)} className="posts__icon-btn delete">
                 <img src={deleteIcon} alt="Delete" className="posts__icon-image" />
               </button>
             </div>
           )}
 
           <div className="posts__header">
-            <img src={post.user.profile} alt={post.user.name} className="posts__profile-pic" />
+            <img 
+              src={post.user?.profilePicture || profileImg} 
+              alt={post.username} 
+              className="posts__profile-pic" 
+            />
             <div className="posts__user-info">
-              <h6 className="posts__user-name">{post.user.name}</h6>
-              <small className="posts__meta">{post.skill} • {post.timestamp}</small>
+              <h6 className="posts__user-name">{post.username}</h6>
+              <small className="posts__meta">{post.postDate}</small>
             </div>
           </div>
 
@@ -189,10 +167,10 @@ export default function Posts({ editable = false }) {
 
           <div className="posts__actions">
             <button className="posts__action-btn">
-              👍 Like ({post.likes})
+              👍 Like ({post.likes || 0})
             </button>
             <button className="posts__action-btn">
-              💬 Comment ({post.comments})
+              💬 Comment ({post.comments?.length || 0})
             </button>
             <button className="posts__action-btn">
               ↗ Share

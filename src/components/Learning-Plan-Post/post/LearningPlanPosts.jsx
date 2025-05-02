@@ -8,7 +8,7 @@ export default function LearningPlanPosts() {
   const [learningPlans, setLearningPlans] = useState([]);
   const [likedPlans, setLikedPlans] = useState({});
   const [commentsVisible, setCommentsVisible] = useState({});
-  const { user } = useContext(UserContext);
+  // const { user } = useContext(UserContext);
 
   useEffect(() => {
     getAllLearningPlans();
@@ -16,12 +16,12 @@ export default function LearningPlanPosts() {
 
   const getAllLearningPlans = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/learning/plans/${user.id}`);
+      const response = await axios.get(`http://localhost:8080/api/v1/learning/plans`);
       
       const transformedData = response.data.map(plan => ({
         id: plan.id,
         user: {
-          name: `${user.firstName} ${user.lastName}`,
+          // name: `${user.firstName} ${user.lastName}`,
           profile: profileImg 
         },
         title: plan.title,
@@ -104,36 +104,36 @@ export default function LearningPlanPosts() {
     }
   };
 
-  const handleLike = async (planId) => {
-    try {
-      setLearningPlans(prevPlans => 
-        prevPlans.map(plan => 
-          plan.id === planId 
-            ? { ...plan, likes: likedPlans[planId] ? plan.likes - 1 : plan.likes + 1 } 
-            : plan
-        )
-      );
+  // const handleLike = async (planId) => {
+  //   try {
+  //     setLearningPlans(prevPlans => 
+  //       prevPlans.map(plan => 
+  //         plan.id === planId 
+  //           ? { ...plan, likes: likedPlans[planId] ? plan.likes - 1 : plan.likes + 1 } 
+  //           : plan
+  //       )
+  //     );
       
-      setLikedPlans(prev => ({
-        ...prev,
-        [planId]: !prev[planId]
-      }));
+  //     setLikedPlans(prev => ({
+  //       ...prev,
+  //       [planId]: !prev[planId]
+  //     }));
       
-      await axios.post(`http://localhost:8080/api/v1/learning/plans/${planId}/like`, {
-        userId: user.id,
-        like: !likedPlans[planId]
-      });
-    } catch (err) {
-      console.error('Error updating like:', err);
-      setLearningPlans(prevPlans => 
-        prevPlans.map(plan => 
-          plan.id === planId 
-            ? { ...plan, likes: likedPlans[planId] ? plan.likes + 1 : plan.likes - 1 } 
-            : plan
-        )
-      );
-    }
-  };
+  //     await axios.post(`http://localhost:8080/api/v1/learning/plans/${planId}/like`, {
+  //       userId: user.id,
+  //       like: !likedPlans[planId]
+  //     });
+  //   } catch (err) {
+  //     console.error('Error updating like:', err);
+  //     setLearningPlans(prevPlans => 
+  //       prevPlans.map(plan => 
+  //         plan.id === planId 
+  //           ? { ...plan, likes: likedPlans[planId] ? plan.likes + 1 : plan.likes - 1 } 
+  //           : plan
+  //       )
+  //     );
+  //   }
+  // };
 
   const toggleComments = (planId) => {
     setCommentsVisible(prev => ({
@@ -170,7 +170,7 @@ export default function LearningPlanPosts() {
                     className="learning-plan__profile-pic"
                   />
                   <div className="learning-plan__name-info">
-                    <h6 className="learning-plan__user-name">{user.name}</h6>
+                    {/* <h6 className="learning-plan__user-name">{user.name}</h6> */}
                     <div className="learning-plan__timestamp">{plan.timestamp}</div>
                   </div>
                 </div>
@@ -271,7 +271,7 @@ export default function LearningPlanPosts() {
               <div className="learning-plan__footer">
                 <div 
                   className="learning-plan__action" 
-                  onClick={() => handleLike(plan.id)}
+                  // onClick={() => handleLike(plan.id)}
                   style={{ color: likedPlans[plan.id] ? '#2ecc71' : '#555' }}
                 >
                   <i className="fas fa-thumbs-up"></i>
