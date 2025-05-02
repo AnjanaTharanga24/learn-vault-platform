@@ -4,6 +4,7 @@ import { UserContext } from '../../../common/UserContext';
 import profileImg from '../../../assets/images/profile.png';
 import { uploadToCloudinary } from '../../utils/uploadToCloudinary';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default function SkillSharingPostModal({ show, handleClose, onPostCreated }) {
   const { user } = useContext(UserContext);
@@ -51,6 +52,16 @@ export default function SkillSharingPostModal({ show, handleClose, onPostCreated
   const createPost = async (postData) => {
     try {
       const response = await axios.post(`http://localhost:8080/api/v1/post`, postData);
+      Swal.fire({
+        icon: "success",
+        title: "Learning Plan Created Successfully!",
+        customClass: {
+          popup: "fb-swal-popup",
+        },
+        showConfirmButton: false,
+        timer: 2000,
+      });
+      window.location.reload();
       return response.data;
     } catch (error) {
       console.error('Error creating post:', error);
