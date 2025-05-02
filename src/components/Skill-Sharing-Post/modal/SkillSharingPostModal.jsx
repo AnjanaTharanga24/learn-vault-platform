@@ -1,46 +1,18 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { Modal } from 'react-bootstrap';
 import { UserContext } from '../../../common/UserContext';
 import profileImg from '../../../assets/images/profile.png';
+import { uploadToCloudinary } from '../../utils/uploadToCloudinary';
+import axios from 'axios';
 
-export default function SkillSharingPostModal({ show, handleClose }) {
-  const { user } = React.useContext(UserContext);
+export default function SkillSharingPostModal({ show, handleClose, onPostCreated }) {
+  const { user } = useContext(UserContext);
   const [images, setImages] = useState([]);
   const [video, setVideo] = useState(null);
   const [description, setDescription] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const imageInputRef = useRef(null);
   const videoInputRef = useRef(null);
-
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    const validImages = files.slice(0, 3 - images.length);
-    
-    const newImages = validImages.map(file => ({
-      file,
-      preview: URL.createObjectURL(file)
-    }));
-
-    setImages(prev => [...prev, ...newImages]);
-  };
-
-  const handleVideoUpload = (e) => {
-    const file = e.target.files[0];
-    
-    // Create video element to check duration
-    const video = document.createElement('video');
-    video.preload = 'metadata';
-    video.onloadedmetadata = () => {
-      if (video.duration <= 30) {
-        setVideo({
-          file,
-          preview: URL.createObjectURL(file)
-        });
-      } else {
-        alert('Video must be less than 30 seconds');
-      }
-    };
-    video.src = URL.createObjectURL(file);
-  };
 
   const removeImage = (index) => {
     const newImages = [...images];
@@ -52,11 +24,69 @@ export default function SkillSharingPostModal({ show, handleClose }) {
     setVideo(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleImageUpload = async (event) => {
+    try {
+      setIsLoading(true);
+      const imageUrl = await uploadToCloudinary(event.target.files[0], "image");
+      setImages(prev => [...prev, { url: imageUrl }]);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVideoUpload = async (event) => {
+    try {
+      setIsLoading(true);
+      const videoUrl = await uploadToCloudinary(event.target.files[0], "video");
+      setVideo({ url: videoUrl });
+    } catch (error) {
+      console.error('Error uploading video:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const createPost = async (postData) => {
+    try {
+      const response = await axios.post(`http://localhost:8080/api/v1/post`, postData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating post:', error);
+      throw error;
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Implement post submission logic here
-    console.log('Post submitted', { images, video, description });
-    handleClose();
+    if (!description || (images.length === 0 && !video)) return;
+
+    try {
+      setIsLoading(true);
+      
+      const postData = {
+        description,
+        imageUrls: images.map(img => img.url),
+        videoUrl: video?.url || null,
+        userId: user.id 
+      };
+
+      const createdPost = await createPost(postData);
+      console.log('Post created:', createdPost);
+      
+      setDescription('');
+      setImages([]);
+      setVideo(null);
+      
+      handleClose();
+      if (onPostCreated) onPostCreated(createdPost);
+      
+    } catch (error) {
+      console.error('Error creating post:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -88,7 +118,7 @@ export default function SkillSharingPostModal({ show, handleClose }) {
           {images.map((image, index) => (
             <div key={index} className="image-preview position-relative me-2 mb-2">
               <img 
-                src={image.preview} 
+                src={image.url} 
                 alt={`Preview ${index + 1}`} 
                 className="img-thumbnail"
                 style={{ width: '100px', height: '100px', objectFit: 'cover' }}
@@ -105,7 +135,7 @@ export default function SkillSharingPostModal({ show, handleClose }) {
           {video && (
             <div className="video-preview position-relative me-2 mb-2">
               <video 
-                src={video.preview} 
+                src={video.url} 
                 className="img-thumbnail"
                 style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                 controls
@@ -134,9 +164,10 @@ export default function SkillSharingPostModal({ show, handleClose }) {
                   <button 
                     className="btn btn-outline-secondary me-2"
                     onClick={() => imageInputRef.current.click()}
+                    disabled={isLoading}
                   >
                     <i className="fas fa-image me-2"></i>
-                    Add Photo
+                    {isLoading ? 'Uploading...' : 'Add Photo'}
                   </button>
                 </>
               )}
@@ -153,9 +184,10 @@ export default function SkillSharingPostModal({ show, handleClose }) {
                   <button 
                     className="btn btn-outline-secondary"
                     onClick={() => videoInputRef.current.click()}
+                    disabled={isLoading}
                   >
                     <i className="fas fa-video me-2"></i>
-                    Add Video
+                    {isLoading ? 'Uploading...' : 'Add Video'}
                   </button>
                 </>
               )}
@@ -167,9 +199,9 @@ export default function SkillSharingPostModal({ show, handleClose }) {
         <button 
           className="btn btn-primary w-100"
           onClick={handleSubmit}
-          disabled={!description || (images.length === 0 && !video)}
+          disabled={!description || (images.length === 0 && !video) || isLoading}
         >
-          Post
+          {isLoading ? 'Posting...' : 'Post'}
         </button>
       </Modal.Footer>
     </Modal>
