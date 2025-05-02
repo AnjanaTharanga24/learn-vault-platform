@@ -3,6 +3,7 @@ import { Modal } from 'react-bootstrap';
 import { UserContext } from '../../../common/UserContext';
 import profileImg from '../../../assets/images/profile.png';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default function LearningProgressModal({ show, handleClose, onSuccess }) {
   const { user } = useContext(UserContext);
@@ -14,7 +15,6 @@ export default function LearningProgressModal({ show, handleClose, onSuccess }) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Available skill levels
   const skillLevels = ['Beginner', 'Intermediate', 'Advanced', 'Expert'];
 
   const handleChange = (e) => {
@@ -31,21 +31,25 @@ export default function LearningProgressModal({ show, handleClose, onSuccess }) 
     setError('');
 
     try {
-      // Create learning progress request object
       const learningProgressRequest = {
         userId: user?.id,
         skill: formData.skill,
         level: formData.level,
         description: formData.description
       };
-
-      // Make API call to create learning progress
-      const response = await axios.post('/api/learning-progress', learningProgressRequest);
-      
-      // Handle success
-      onSuccess(response.data);
+      const response = await axios.post('http://localhost:8080/api/v1/learning/progresses', learningProgressRequest);
+      console.log('Learning Progress:', response.data);
       resetForm();
       handleClose();
+       Swal.fire({
+              icon: "success",
+              title: "Learning Progress create Successful!",
+              customClass: {
+                popup: "fb-swal-popup",
+              },
+              showConfirmButton: false,
+              timer: 2000,
+            })
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create learning progress. Please try again.');
       console.error('Error creating learning progress:', err);
