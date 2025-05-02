@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import profileImg from '../../../assets/images/profile.png';
 import './posts.css';
+import editIcon from '../../../assets/images/edit.png';
+import deleteIcon from '../../../assets/images/delete.png';
+import { uploadToCloudinary } from '../../utils/uploadToCloudinary';
 
 const mockPosts = [
   {
@@ -39,7 +42,6 @@ const mockPosts = [
     comments: 7,
     timestamp: '2 hours ago'
   },
-
   {
     id: 1,
     user: {
@@ -60,7 +62,7 @@ const mockPosts = [
   }
 ];
 
-export default function Posts() {
+export default function Posts({ editable = false }) {
   const [posts, setPosts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -93,6 +95,24 @@ export default function Posts() {
     setCurrentMediaIndex(prev => (prev < currentPostMedia.length - 1 ? prev + 1 : 0));
   };
 
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      setPosts(prev => prev.filter(post => post.id !== id));
+    }
+  };
+
+  //Handle image upload
+  const handleImageUpload = async (event) => {
+    const imageUrl = await uploadToCloudinary(event.target.files[0], "image");
+    setSelectedImage(imageUrl);
+    setIsLoading(false);
+    // formik.setFieldValue("image", imageUrl);
+  };
+
+  const handleUpdate = (id) => {
+    alert(`Update post ${id} (connect to modal/form if needed)`);
+  };
+
   const renderPostMedia = (post) => {
     const mediaItems = [
       ...(post.video ? [post.video] : []),
@@ -103,23 +123,10 @@ export default function Posts() {
 
     return (
       <div className="posts__media-grid">
-        {/* Main media item (larger) */}
-        <div 
-          className="posts__main-media-item" 
-          onClick={() => handleMediaClick(post, 0)}
-        >
+        <div className="posts__main-media-item" onClick={() => handleMediaClick(post, 0)}>
           {isVideo(mediaItems[0]) ? (
             <div className="posts__video-container">
-              <video 
-                className="posts__media-element"
-                playsInline
-                muted
-                preload="metadata"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleMediaClick(post, 0);
-                }}
-              >
+              <video className="posts__media-element" playsInline muted preload="metadata">
                 <source src={mediaItems[0]} type="video/mp4" />
               </video>
               <div className="posts__play-icon">▶</div>
@@ -128,37 +135,22 @@ export default function Posts() {
             <img src={mediaItems[0]} alt="Main media" className="posts__media-element" />
           )}
         </div>
-        
-        {/* Three smaller items */}
         <div className="posts__secondary-media-container">
           {mediaItems.slice(1, 4).map((media, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="posts__secondary-media-item"
               onClick={() => handleMediaClick(post, index + 1)}
             >
               {isVideo(media) ? (
                 <div className="posts__video-container">
-                  <video 
-                    className="posts__media-element"
-                    playsInline
-                    muted
-                    preload="metadata"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMediaClick(post, index + 1);
-                    }}
-                  >
+                  <video className="posts__media-element" playsInline muted preload="metadata">
                     <source src={media} type="video/mp4" />
                   </video>
                   <div className="posts__play-icon">▶</div>
                 </div>
               ) : (
-                <img 
-                  src={media} 
-                  alt={`Screenshot ${index + 1}`} 
-                  className="posts__media-element"
-                />
+                <img src={media} alt={`Screenshot ${index + 1}`} className="posts__media-element" />
               )}
             </div>
           ))}
@@ -171,66 +163,71 @@ export default function Posts() {
     <div className="posts__container">
       {posts.map(post => (
         <div key={post.id} className="posts__card">
+          {editable && (
+            <div className="posts__edit-buttons">
+              <button onClick={() => handleUpdate(post.id)} className="posts__icon-btn">
+                <img src={editIcon} alt="Edit" className="posts__icon-image" />
+              </button>
+              <button onClick={() => handleDelete(post.id)} className="posts__icon-btn delete">
+                <img src={deleteIcon} alt="Delete" className="posts__icon-image" />
+              </button>
+            </div>
+          )}
+
           <div className="posts__header">
-            <img 
-              src={post.user.profile} 
-              alt={post.user.name} 
-              className="posts__profile-pic"
-            />
+            <img src={post.user.profile} alt={post.user.name} className="posts__profile-pic" />
             <div className="posts__user-info">
               <h6 className="posts__user-name">{post.user.name}</h6>
               <small className="posts__meta">{post.skill} • {post.timestamp}</small>
             </div>
           </div>
-          
+
           <div className="posts__body">
             <p className="posts__description">{post.description}</p>
             {renderPostMedia(post)}
           </div>
-          
+
           <div className="posts__actions">
             <button className="posts__action-btn">
-              <i className="fas fa-thumbs-up"></i> Like ({post.likes})
+              👍 Like ({post.likes})
             </button>
             <button className="posts__action-btn">
-              <i className="fas fa-comment"></i> Comment ({post.comments})
+              💬 Comment ({post.comments})
             </button>
             <button className="posts__action-btn">
-              <i className="fas fa-share"></i> Share
+              ↗ Share
             </button>
           </div>
         </div>
       ))}
 
-      {/* Media Modal */}
       {showModal && (
         <div className="posts__modal">
           <div className="posts__modal-overlay" onClick={() => setShowModal(false)}></div>
           <div className="posts__modal-content">
-            <button 
-              className="posts__modal-close" 
+            <button
+              className="posts__modal-close"
               onClick={() => setShowModal(false)}
               aria-label="Close modal"
             >
               &times;
             </button>
-            
+
             <div className="posts__modal-media-container">
               {isVideo(currentPostMedia[currentMediaIndex]) ? (
-                <video 
-                  controls 
+                <video
+                  controls
                   autoPlay
                   className="posts__modal-media"
                   playsInline
                   key={currentPostMedia[currentMediaIndex]}
                 >
                   <source src={currentPostMedia[currentMediaIndex]} type="video/mp4" />
-                  Your browser does not support the video tag.
                 </video>
               ) : (
-                <img 
-                  src={currentPostMedia[currentMediaIndex]} 
-                  alt="Media preview" 
+                <img
+                  src={currentPostMedia[currentMediaIndex]}
+                  alt="Media preview"
                   className="posts__modal-media"
                 />
               )}
@@ -238,21 +235,13 @@ export default function Posts() {
 
             {currentPostMedia.length > 1 && (
               <div className="posts__modal-navigation">
-                <button 
-                  className="posts__nav-button posts__nav-button--prev" 
-                  onClick={handlePrev}
-                  aria-label="Previous media"
-                >
+                <button className="posts__nav-button posts__nav-button--prev" onClick={handlePrev}>
                   &lt;
                 </button>
                 <div className="posts__media-counter">
                   {currentMediaIndex + 1} / {currentPostMedia.length}
                 </div>
-                <button 
-                  className="posts__nav-button posts__nav-button--next" 
-                  onClick={handleNext}
-                  aria-label="Next media"
-                >
+                <button className="posts__nav-button posts__nav-button--next" onClick={handleNext}>
                   &gt;
                 </button>
               </div>
