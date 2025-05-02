@@ -3,6 +3,7 @@ import profileImg from '../../../assets/images/profile.png';
 import './posts.css';
 import editIcon from '../../../assets/images/edit.png';
 import deleteIcon from '../../../assets/images/delete.png';
+import { uploadToCloudinary } from '../../utils/uploadToCloudinary';
 
 const mockPosts = [
   {
@@ -41,7 +42,6 @@ const mockPosts = [
     comments: 7,
     timestamp: '2 hours ago'
   },
-
   {
     id: 1,
     user: {
@@ -99,6 +99,14 @@ export default function Posts({ editable = false }) {
     if (window.confirm('Are you sure you want to delete this post?')) {
       setPosts(prev => prev.filter(post => post.id !== id));
     }
+  };
+
+  //Handle image upload
+  const handleImageUpload = async (event) => {
+    const imageUrl = await uploadToCloudinary(event.target.files[0], "image");
+    setSelectedImage(imageUrl);
+    setIsLoading(false);
+    // formik.setFieldValue("image", imageUrl);
   };
 
   const handleUpdate = (id) => {
