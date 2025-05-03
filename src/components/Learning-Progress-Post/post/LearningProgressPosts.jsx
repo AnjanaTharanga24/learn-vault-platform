@@ -3,10 +3,14 @@ import profileImg from '../../../assets/images/profile.png';
 import './learningProgress.css'; 
 import axios from 'axios';
 import { UserContext } from '../../../common/UserContext';
+import UpdateLearningProgressModal from './UpdateLearningProgressModal';
+import Swal from 'sweetalert2';
 
 export default function LearningProgressPosts() {
   const [progressPosts, setProgressPosts] = useState([]);
   const { user } = useContext(UserContext);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
     getAllLearningProgress();
@@ -34,6 +38,63 @@ export default function LearningProgressPosts() {
       console.log(err);
       setProgressPosts([]);
     }
+  };
+
+  const handleEditPost = (post) => {
+    setSelectedPost(post);
+    setShowUpdateModal(true);
+  };
+
+  const handleDeletePost = async (postId) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.delete(`http://localhost:8080/api/v1/learning/progresses/${postId}`);
+          
+          // Update the UI by removing the deleted post
+          setProgressPosts(progressPosts.filter(post => post.id !== postId));
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Your learning progress has been deleted.',
+            customClass: {
+              popup: "fb-swal-popup",
+            },
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        } catch (error) {
+          console.error('Error deleting post:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to delete the learning progress.',
+          });
+        }
+      }
+    });
+  };
+
+  const handleUpdateSuccess = (updatedPost) => {
+    setProgressPosts(progressPosts.map(post => 
+      post.id === updatedPost.id ? {
+        ...post,
+        skill: updatedPost.skill,
+        level: updatedPost.level,
+        description: updatedPost.description
+      } : post
+    ));
+    setShowUpdateModal(false);
+    setSelectedPost(null);
   };
 
   const formatTimestamp = (date) => {
@@ -119,6 +180,22 @@ export default function LearningProgressPosts() {
                     <div className="learning-progress__timestamp">{post.timestamp}</div>
                   </div>
                 </div>
+                <div className="learning-progress__actions d-flex ">
+                  <button 
+                    className="learning-progress__action-btn learning-progress__edit-btn" 
+                    onClick={() => handleEditPost(post)}
+                    title="Edit"
+                  >
+                    <i className="fas fa-edit"></i>
+                  </button>
+                  <button 
+                    className="learning-progress__action-btn learning-progress__delete-btn" 
+                    onClick={() => handleDeletePost(post.id)}
+                    title="Delete"
+                  >
+                    <i className="fas fa-trash"></i>
+                  </button>
+                </div>
               </div>
               
               <div className="learning-progress__body">
@@ -172,6 +249,18 @@ export default function LearningProgressPosts() {
         <div className="learning-progress__empty-state">
           <p>No learning progress posts found. Start sharing your learning journey!</p>
         </div>
+      )}
+
+      {selectedPost && (
+        <UpdateLearningProgressModal
+          show={showUpdateModal}
+          handleClose={() => {
+            setShowUpdateModal(false);
+            setSelectedPost(null);
+          }}
+          post={selectedPost}
+          onSuccess={handleUpdateSuccess}
+        />
       )}
     </div>
   );
