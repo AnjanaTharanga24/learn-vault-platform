@@ -197,7 +197,6 @@ export default function Posts({ editable = false }) {
         </div>
       ))}
 
-      {/* Media preview modal */}
       {showModal && (
         <div className="posts__modal">
           <div className="posts__modal-overlay" onClick={() => setShowModal(false)}></div>
