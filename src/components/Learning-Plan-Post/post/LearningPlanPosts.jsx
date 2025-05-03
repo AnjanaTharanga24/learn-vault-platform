@@ -8,7 +8,7 @@ export default function LearningPlanPosts() {
   const [learningPlans, setLearningPlans] = useState([]);
   const [likedPlans, setLikedPlans] = useState({});
   const [commentsVisible, setCommentsVisible] = useState({});
-  // const { user } = useContext(UserContext);
+  const { user } = useContext(UserContext);
 
   useEffect(() => {
     getAllLearningPlans();
@@ -16,7 +16,7 @@ export default function LearningPlanPosts() {
 
   const getAllLearningPlans = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/learning/plans`);
+      const response = await axios.get(`http://localhost:8080/api/v1/learning/plans/${user.id}`);
       
       const transformedData = response.data.map(plan => ({
         id: plan.id,
