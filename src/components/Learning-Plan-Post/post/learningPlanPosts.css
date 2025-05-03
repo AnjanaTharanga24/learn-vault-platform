@@ -285,3 +285,56 @@
       gap: 8px;
     }
   }
+
+
+.posts__edit-buttons {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.posts__icon-btn {
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 5px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.posts__icon-btn:hover {
+  color: #3498db;
+  background-color: #f5f5f5;
+}
+
+.posts__icon-btn.delete:hover {
+  color: #e74c3c;
+}
+
+.learning-plan__user-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%; 
+  position: relative;
+}
+
+.learning-plan__status-dropdown select {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  background-color: white;
+}
+
+@media (max-width: 576px) {
+  .learning-plan__user-wrapper {
+    flex-wrap: wrap;
+  }
+  
+  .posts__edit-buttons {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+}
