@@ -11,6 +11,9 @@ import LearningPlanModal from "../../components/Learning-Plan-Post/modal/Learnin
 import LearningProgressModal from "../../components/Learning-Progress-Post/Form/LearningProgressFrom";
 import LearningProgressPosts from "../../components/Learning-Progress-Post/post/LearningProgressPosts";
 import LearningPlanPosts from "../../components/Learning-Plan-Post/post/LearningPlanPosts";
+import SkillPostFeed from "../../components/Feed/Skill-Post/SkillPostFeed";
+import LearningPlanPostFeed from "../../components/Feed/Plan/LearningPlanPostFeed";
+import LearningProgressPostFeed from "../../components/Feed/Progress/LearningProgressPostFeed";
 
 export default function Home() {
   const { user } = useContext(UserContext);
@@ -70,9 +73,12 @@ export default function Home() {
               </div>
             )}
 
-            <Posts />
+            <SkillPostFeed/>
+            <LearningPlanPostFeed/>
+            <LearningProgressPostFeed/>
+            {/* <Posts />
             <LearningProgressPosts/>
-            <LearningPlanPosts/>
+            <LearningPlanPosts/> */}
           </div>
         </div>
         <div className="col-lg-2">
