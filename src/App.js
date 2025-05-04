@@ -8,6 +8,7 @@ import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import { UserProvider } from './common/UserContext';
 import UserProfile from './pages/User-Profile/UserProfile';
+import FollowUsers from './pages/Follow-Users/FollowUsers';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/login" element={<Login/>} />
           <Route path="/register" element={<Signup/>} />
           <Route path="/profile" element={<UserProfile/>} />
+          <Route path="/follow" element={<FollowUsers/>} />
         </Routes>
       </Router>
     </div>
