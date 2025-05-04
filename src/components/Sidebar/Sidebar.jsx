@@ -89,7 +89,7 @@ export default function Sidebar() {
             <button className="btn btn-sm btn-outline-primary">Follow</button>
           </div>
         ))}
-        <Link to="/find-users" className="btn btn-outline-primary btn-sm w-100 mt-2">
+        <Link to="/follow" className="btn btn-outline-primary btn-sm w-100 mt-2">
           Find More Users
         </Link>
       </div>

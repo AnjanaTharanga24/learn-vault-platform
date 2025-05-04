@@ -1,0 +1,190 @@
+/* Main container styles */
+.main-content {
+    background-color: #f0f2f5;
+    min-height: 100vh;
+}
+
+/* Facebook-style grid layout */
+.user-grid.facebook-style-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 0 8px;
+    max-width: 800px; /* Optional: to prevent cards from getting too wide */
+    margin: 0 auto; /* Center the grid */
+}
+
+/* Facebook-style user card */
+.user-card.facebook-style {
+    position: relative;
+    border: 1px solid #dddfe2;
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.user-card.facebook-style:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-card.facebook-style .user-card-header {
+    height: 100px;
+    position: relative;
+    background: #f0f2f5;
+    display: block;
+}
+
+.user-card.facebook-style .user-cover-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-card.facebook-style .user-cover-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #4568dc, #b06ab3);
+}
+
+.user-card.facebook-style .user-avatar-container {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid #fff;
+    border-radius: 50%;
+    background: #fff;
+}
+
+.user-card.facebook-style .user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-card.facebook-style .user-avatar-placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e4e6eb;
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.user-card.facebook-style .user-card-body {
+    padding: 35px 12px 12px;
+    text-align: center;
+}
+
+.user-card.facebook-style .user-name {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #050505;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-card.facebook-style .mutual-friends {
+    margin: 0 0 12px;
+    font-size: 12px;
+    color: #65676b;
+    min-height: 15px;
+}
+
+.user-card.facebook-style .action-buttons {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.user-card.facebook-style .add-friend-btn {
+    flex: 1;
+    background-color: #1b74e4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.user-card.facebook-style .add-friend-btn:hover {
+    background-color: #166fe5;
+}
+
+.user-card.facebook-style .add-friend-btn.friend-requested {
+    background-color: #e4e6eb;
+    color: #050505;
+}
+
+.user-card.facebook-style .remove-btn {
+    width: 36px;
+    background-color: #e4e6eb;
+    color: #050505;
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.user-card.facebook-style .remove-btn:hover {
+    background-color: #d8dadf;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .user-grid.facebook-style-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    .col-lg-8.main-content {
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .user-grid.facebook-style-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}
+
+@media (max-width: 576px) {
+    .user-grid.facebook-style-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+    }
+    
+    .user-card.facebook-style .user-card-header {
+        height: 80px;
+    }
+    
+    .user-card.facebook-style .user-avatar {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .user-card.facebook-style .user-avatar-placeholder {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .user-card.facebook-style .user-card-body {
+        padding: 30px 8px 8px;
+    }
+}
+
