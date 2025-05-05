@@ -77,9 +77,9 @@ export default function SkillPostFeed({ editable = false }) {
     alert(`Update post ${postId} (connect to modal/form if needed)`);
   };
 
+//handle comments
   const handleAddComment = async (postId) => {
 
-    console.log(postId,"post id")
     const id = user?.id;
     try{
       const response = await axios.post(`http://localhost:8080/api/v1/comment?postId=${postId}`,
@@ -96,6 +96,17 @@ export default function SkillPostFeed({ editable = false }) {
     console.log(commentInputs,"check comment")
   };
 
+  const handleDeleteComment = async( postId,commentId) => {
+
+    const id = user?.id;
+    try{
+      const response = await axios.delete(`http://localhost:8080/api/v1/comment?postId=${postId}&userId=${id}&commentId=${commentId}`);
+      console.log(response,"comment deleted");
+    }catch(e){
+        console.log(e, "comment delete error")
+    }
+
+  }
   const renderPostMedia = (post) => {
     const mediaItems = [
       ...(post.videoUrl ? [post.videoUrl] : []),
@@ -148,6 +159,7 @@ export default function SkillPostFeed({ editable = false }) {
   if (error) return <div className="posts__error">Error: {error}</div>;
   if (posts.length === 0) return <div className="posts__empty">No posts to display</div>;
 
+  console.log(posts,"post")
   return (
     <div className="posts__container">
       {posts?.map(post => (
@@ -185,10 +197,10 @@ export default function SkillPostFeed({ editable = false }) {
               post.comments.map((c, i) => (
                 <div key={i} className="posts__comment">
                   <strong>{c?.user.name}:</strong> {c?.comment}
-                  {((c?.user.id === user.id)||(c?.user.username == post.username) ) && (
+                  {((c?.user.id === user.id)/*||(c?.user.username == post.username)*/ ) && (
                     <span className="posts__comment-actions">
                       <button className="posts__comment-edit">Edit</button>
-                      <button className="posts__comment-delete">Delete</button>
+                      <button className="posts__comment-delete" onClick={()=>handleDeleteComment(post.postId,c.commentId)}>Delete</button>
                     </span>
                   )}
                 </div>
@@ -201,8 +213,6 @@ export default function SkillPostFeed({ editable = false }) {
                 type="text"
                 placeholder="Write a comment..."
                 className="posts__comment-input"
-                // value={activePostId === post.postId ? activeComment : ''}
-                // onFocus={() => setActivePostId(post.postId)}
                 onChange={(e) => setCommentInputs(e.target.value)}
               />
               <button
