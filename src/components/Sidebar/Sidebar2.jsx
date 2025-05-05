@@ -231,6 +231,7 @@ export default function Sidebar2() {
                         {topic}
                       </span>
                     ))}
+
                   </div>
                 </div>
               </div>
@@ -247,6 +248,7 @@ export default function Sidebar2() {
             >
               <PlusCircle size={16} className="me-1" />
               Create Plan
+
             </Link>
           </div>
         )}
