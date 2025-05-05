@@ -77,15 +77,23 @@ export default function SkillPostFeed({ editable = false }) {
     alert(`Update post ${postId} (connect to modal/form if needed)`);
   };
 
-  const handleAddComment = (postId) => {
-    const newComment = commentInputs[postId]?.trim();
-    if (!newComment) return;
-    setPosts(prev => prev.map(post =>
-      post.postId === postId
-        ? { ...post, comments: [...(post.comments || []), { user: 'You', text: newComment }] }
-        : post
-    ));
-    setCommentInputs(prev => ({ ...prev, [postId]: '' }));
+  const handleAddComment = async (postId) => {
+
+    console.log(postId,"post id")
+    const id = user?.id;
+    try{
+      const response = await axios.post(`http://localhost:8080/api/v1/comment?postId=${postId}`,
+        {
+          userId: id,
+          comment: commentInputs
+        }
+       );
+      console.log(response,"comment added");
+    }catch(e){
+        console.log(e, "comment add error")
+      }
+
+    console.log(commentInputs,"check comment")
   };
 
   const renderPostMedia = (post) => {
@@ -140,7 +148,6 @@ export default function SkillPostFeed({ editable = false }) {
   if (error) return <div className="posts__error">Error: {error}</div>;
   if (posts.length === 0) return <div className="posts__empty">No posts to display</div>;
 
-  console.log(posts,"posts")
   return (
     <div className="posts__container">
       {posts?.map(post => (
@@ -194,10 +201,18 @@ export default function SkillPostFeed({ editable = false }) {
                 type="text"
                 placeholder="Write a comment..."
                 className="posts__comment-input"
-                value={commentInputs[post.postId] || ''}
-                onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.postId]: e.target.value }))}
+                // value={activePostId === post.postId ? activeComment : ''}
+                // onFocus={() => setActivePostId(post.postId)}
+                onChange={(e) => setCommentInputs(e.target.value)}
               />
-              <button onClick={() => handleAddComment(post.postId)} className="posts__comment-submit">Post</button>
+              <button
+                onClick={() => {
+                  handleAddComment(post.postId, commentInputs);
+                }}
+                className="posts__comment-submit"
+              >
+                Post
+              </button>
             </div>
           </div>
         </div>
