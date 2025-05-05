@@ -11,24 +11,18 @@ export default function FollowUsers() {
     const [allUsers, setAllUsers] = useState([]);
     const [followedUsers, setFollowedUsers] = useState(new Set());
     const [loading, setLoading] = useState(true);
-    const [followLoading, setFollowLoading] = useState({}); // Track loading state for each follow button
+    const [followLoading, setFollowLoading] = useState({});
     const { user } = useContext(UserContext);
     const [error, setError] = useState(null);
-
-    // API base URL constant - easier to update in one place
     const API_BASE_URL = 'http://localhost:8080/api/v1';
 
     useEffect(() => {
         if (user?.id) {
-            // Load followed users first to ensure we have that data before showing users
             getFollowedUsers().then(() => {
                 getAllUsers();
             });
-
-            // Apply stored follows from localStorage on initial render
             const storedFollows = JSON.parse(localStorage.getItem(`follows_${user.id}`) || '[]');
             if (storedFollows.length > 0) {
-                // Apply stored follows immediately while API call is in progress
                 setFollowedUsers(new Set(storedFollows));
             }
         }
@@ -39,12 +33,9 @@ export default function FollowUsers() {
             setLoading(true);
             setError(null);
             const response = await axios.get(`${API_BASE_URL}/user/all-users`);
-            
-            // Filter out current user and sort by name for better UX
             const filteredUsers = response.data
                 .filter(u => u.id !== user?.id)
                 .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-                
             setAllUsers(filteredUsers); 
         } catch (error) {
             console.error('Error fetching all users:', error);
@@ -60,58 +51,41 @@ export default function FollowUsers() {
             setError(null);
             const response = await axios.get(`${API_BASE_URL}/follow/following/${user.id}`);
             const following = response.data.map(followUser => followUser.userId);
-            console.log("Followed users loaded:", following);
             setFollowedUsers(new Set(following));
-            
-            // Update localStorage with server data
             localStorage.setItem(`follows_${user.id}`, JSON.stringify(following));
-            
-            return following; // Return data for chaining
+            return following;
         } catch (error) {
             console.error('Error fetching followed users:', error);
             toast.error('Failed to load your followed users');
-            return []; // Return empty array if error
+            return [];
         }
     };
 
     const handleFollow = async (userId, userName) => {
-        if (followLoading[userId]) return; // Prevent double clicks
+        if (followLoading[userId]) return;
         
         try {
-            // Update local loading state for this specific button
             setFollowLoading(prev => ({ ...prev, [userId]: true }));
-            
-            // Make API call
             await axios.patch(`${API_BASE_URL}/follow/${user.id}/follow/${userId}`);
-            
-            // Add to followed users set
             setFollowedUsers(prev => {
                 const newSet = new Set(prev);
                 newSet.add(userId);
                 return newSet;
             });
-            
-            // Update local storage to persist follows between page refreshes
             const storedFollows = JSON.parse(localStorage.getItem(`follows_${user.id}`) || '[]');
             if (!storedFollows.includes(userId)) {
                 localStorage.setItem(`follows_${user.id}`, JSON.stringify([...storedFollows, userId]));
             }
-            
             toast.success(`You are now following ${userName || 'this user'}`);
         } catch (error) {
             console.error('Error following user:', error);
-            
             if (error.response && error.response.status === 409) {
                 toast.info('You are already following this user');
-                
-                // Ensure UI reflects this
                 setFollowedUsers(prev => {
                     const newSet = new Set(prev);
                     newSet.add(userId);
                     return newSet;
                 });
-                
-                // Update local storage
                 const storedFollows = JSON.parse(localStorage.getItem(`follows_${user.id}`) || '[]');
                 if (!storedFollows.includes(userId)) {
                     localStorage.setItem(`follows_${user.id}`, JSON.stringify([...storedFollows, userId]));
@@ -120,50 +94,38 @@ export default function FollowUsers() {
                 toast.error('Failed to follow user');
             }
         } finally {
-            // Reset loading state
             setFollowLoading(prev => ({ ...prev, [userId]: false }));
         }
     };
 
     const handleUnfollow = async (userId, userName) => {
-        if (followLoading[userId]) return; // Prevent double clicks
+        if (followLoading[userId]) return;
         
         try {
-            // Update local loading state for this specific button
             setFollowLoading(prev => ({ ...prev, [userId]: true }));
-            
-            // Make API call
             await axios.patch(`${API_BASE_URL}/follow/${user.id}/unfollow/${userId}`);
-            
-            // Remove from followed users set
             setFollowedUsers(prev => {
                 const newSet = new Set(prev);
                 newSet.delete(userId);
                 return newSet;
             });
-            
-            // Update local storage to persist unfollows between page refreshes
             const storedFollows = JSON.parse(localStorage.getItem(`follows_${user.id}`) || '[]');
             const updatedFollows = storedFollows.filter(id => id !== userId);
             localStorage.setItem(`follows_${user.id}`, JSON.stringify(updatedFollows));
-            
             toast.info(`You have unfollowed ${userName || 'this user'}`);
         } catch (error) {
             console.error('Error unfollowing user:', error);
             toast.error('Failed to unfollow user');
         } finally {
-            // Reset loading state
             setFollowLoading(prev => ({ ...prev, [userId]: false }));
         }
     };
 
     const handleRemoveSuggestion = (userId) => {
-        // Remove user from suggestions list
         setAllUsers(prev => prev.filter(user => user.id !== userId));
         toast.info('Suggestion removed');
     };
 
-    // Function to refresh user suggestions
     const refreshSuggestions = () => {
         getAllUsers();
         toast.info('Refreshing suggestions...');
@@ -212,15 +174,6 @@ export default function FollowUsers() {
                                                 {allUsers.map((fUser) => (
                                                     <div key={fUser.id} className="user-card facebook-style">
                                                         <div className="user-card-header">
-                                                            {fUser.imgUrl ? (
-                                                                <img 
-                                                                    src={fUser.imgUrl} 
-                                                                    alt={fUser.name || 'User'} 
-                                                                    className="user-cover-photo"
-                                                                />
-                                                            ) : (
-                                                                <div className="user-cover-photo-placeholder"></div>
-                                                            )}
                                                             <div className="user-avatar-container">
                                                                 {fUser.imgUrl ? (
                                                                     <img 
