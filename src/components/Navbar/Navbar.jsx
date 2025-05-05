@@ -40,7 +40,7 @@ export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
       <div className="container-fluid">
-        <Link className="navbar-brand d-flex align-items-center" to="/">
+        <Link className="navbar-brand d-flex align-items-center" to="/home">
           <i className="fas fa-share-alt text-primary me-2 fs-3"></i>
           <span className="fw-bold text-primary">SkillShare</span>
         </Link>
@@ -75,7 +75,7 @@ export default function Navbar() {
         <div className="collapse navbar-collapse" id="navbarContent">
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
             <li className="nav-item px-2">
-              <Link className="nav-link" to="/">
+              <Link className="nav-link" to="/home">
                 <i className="fas fa-home fs-4"></i>
               </Link>
             </li>
