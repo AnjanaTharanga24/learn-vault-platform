@@ -11,7 +11,6 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
-      console.log('logged user :' , user);
     } else {
       localStorage.removeItem("user");
     }
