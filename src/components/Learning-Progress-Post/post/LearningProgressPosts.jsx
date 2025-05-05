@@ -162,22 +162,22 @@ export default function LearningProgressPosts() {
           const skillColor = getSkillBadgeStyle(post.skill);
           
           return (
-            <div key={post.id} className="learning-progress__card">
+            <div key={post?.id} className="learning-progress__card">
               <div className="learning-progress__header">
                 <div className="learning-progress__user-wrapper">
                   <img 
-                    src={post.user.profile} 
-                    alt={post.user.name} 
+                    src={post?.user?.profile} 
+                    alt={post?.user?.name} 
                     className="learning-progress__profile-pic"
                   />
                   <div className="learning-progress__name-info">
                     <div className="learning-progress__name-line">
-                      <h6 className="learning-progress__user-name">{user.name}</h6>
+                      <h6 className="learning-progress__user-name">{user?.name}</h6>
                       <div className="learning-progress__skill-badge" style={{ backgroundColor: `${skillColor}20`, color: skillColor }}>
                         {post.skill}
                       </div>
                     </div>
-                    <div className="learning-progress__timestamp">{post.timestamp}</div>
+                    <div className="learning-progress__timestamp">{post?.timestamp}</div>
                   </div>
                 </div>
                 <div className="learning-progress__actions d-flex ">
@@ -190,7 +190,7 @@ export default function LearningProgressPosts() {
                   </button>
                   <button 
                     className="learning-progress__action-btn learning-progress__delete-btn" 
-                    onClick={() => handleDeletePost(post.id)}
+                    onClick={() => handleDeletePost(post?.id)}
                     title="Delete"
                   >
                     <i className="fas fa-trash"></i>
@@ -208,13 +208,13 @@ export default function LearningProgressPosts() {
                     <div 
                       className="learning-progress__progress-fill" 
                       style={{ 
-                        width: `${levelInfo.percentage}%`,
-                        backgroundColor: levelInfo.color 
+                        width: `${levelInfo?.percentage}%`,
+                        backgroundColor: levelInfo?.color 
                       }}
                     ></div>
                   </div>
                   <div className="learning-progress__percentage">
-                    {levelInfo.percentage}%
+                    {levelInfo?.percentage}%
                   </div>
                 </div>
                 
@@ -225,17 +225,17 @@ export default function LearningProgressPosts() {
                   <span className="learning-progress__level-label">Expert</span>
                 </div>
                 
-                <p className="learning-progress__description">{post.description}</p>
+                <p className="learning-progress__description">{post?.description}</p>
               </div>
               
               <div className="learning-progress__footer">
                 <div className="learning-progress__action">
                   <i className="fas fa-thumbs-up"></i> 
-                  <span>{post.likes}</span>
+                  <span>{post?.likes}</span>
                 </div>
                 <div className="learning-progress__action">
                   <i className="fas fa-comment"></i>
-                  <span>{post.comments}</span>
+                  <span>{post?.comments}</span>
                 </div>
                 <div className="learning-progress__action">
                   <i className="fas fa-share"></i>
