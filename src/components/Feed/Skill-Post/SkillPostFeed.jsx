@@ -5,19 +5,25 @@ import editIcon from '../../../assets/images/edit.png';
 import deleteIcon from '../../../assets/images/delete.png';
 import axios from 'axios';
 import { UserContext } from '../../../common/UserContext';
+import Modal from 'react-bootstrap/Modal';
+import './skillPostFeed.css';
+import Button from 'react-bootstrap/Button';
 
 export default function SkillPostFeed({ editable = false }) {
   const [posts, setPosts] = useState([]);
-  //current user
   const { user } = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [currentPostMedia, setCurrentPostMedia] = useState([]);
-  const [commentInputs, setCommentInputs] = useState({});
+  const [commentInputs, setCommentInputs] = useState('');
+  const [editComment, setEditComment] = useState('');
+  const [editCommentId, setEditCommentId] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editPostId, setEditPostId] = useState(null);
 
-  const API_BASE_URL = 'http://localhost:8080/api/v1/'; 
+  const API_BASE_URL = 'http://localhost:8080/api/v1/';
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -77,36 +83,51 @@ export default function SkillPostFeed({ editable = false }) {
     alert(`Update post ${postId} (connect to modal/form if needed)`);
   };
 
-//handle comments
   const handleAddComment = async (postId) => {
-
     const id = user?.id;
-    try{
-      const response = await axios.post(`http://localhost:8080/api/v1/comment?postId=${postId}`,
-        {
-          userId: id,
-          comment: commentInputs
-        }
-       );
-      console.log(response,"comment added");
-    }catch(e){
-        console.log(e, "comment add error")
-      }
-
-    console.log(commentInputs,"check comment")
+    try {
+      const response = await axios.post(`http://localhost:8080/api/v1/comment?postId=${postId}`, {
+        userId: id,
+        comment: commentInputs
+      });
+      console.log(response, "comment added");
+    } catch (e) {
+      console.log(e, "comment add error")
+    }
   };
 
-  const handleDeleteComment = async( postId,commentId) => {
-
+  const handleDeleteComment = async(postId, commentId) => {
     const id = user?.id;
-    try{
+    try {
       const response = await axios.delete(`http://localhost:8080/api/v1/comment?postId=${postId}&userId=${id}&commentId=${commentId}`);
-      console.log(response,"comment deleted");
-    }catch(e){
-        console.log(e, "comment delete error")
+      console.log(response, "comment deleted");
+    } catch (e) {
+      console.log(e, "comment delete error")
     }
+  };
 
-  }
+  const handleEditComment = (postId, commentId, existingComment) => {
+    setEditComment(existingComment);
+    setEditCommentId(commentId);
+    setEditPostId(postId);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEditedComment = async () => {
+    try {
+      await axios.put(`http://localhost:8080/api/v1/comment`, {
+        postId: editPostId,
+        commentId: editCommentId,
+        userId: user?.id,
+        updatedComment: editComment
+      });
+      setShowEditModal(false);
+      setEditComment('');
+    } catch (e) {
+      console.log(e, "edit comment error");
+    }
+  };
+
   const renderPostMedia = (post) => {
     const mediaItems = [
       ...(post.videoUrl ? [post.videoUrl] : []),
@@ -159,7 +180,6 @@ export default function SkillPostFeed({ editable = false }) {
   if (error) return <div className="posts__error">Error: {error}</div>;
   if (posts.length === 0) return <div className="posts__empty">No posts to display</div>;
 
-  console.log(posts,"post")
   return (
     <div className="posts__container">
       {posts?.map(post => (
@@ -197,10 +217,10 @@ export default function SkillPostFeed({ editable = false }) {
               post.comments.map((c, i) => (
                 <div key={i} className="posts__comment">
                   <strong>{c?.user.name}:</strong> {c?.comment}
-                  {((c?.user.id === user.id)/*||(c?.user.username == post.username)*/ ) && (
+                  {c?.user.id === user.id && (
                     <span className="posts__comment-actions">
-                      <button className="posts__comment-edit">Edit</button>
-                      <button className="posts__comment-delete" onClick={()=>handleDeleteComment(post.postId,c.commentId)}>Delete</button>
+                      <button className="posts__comment-edit" onClick={() => handleEditComment(post.postId, c.commentId, c.comment)}>Edit</button>
+                      <button className="posts__comment-delete" onClick={() => handleDeleteComment(post.postId, c.commentId)}>Delete</button>
                     </span>
                   )}
                 </div>
@@ -216,9 +236,7 @@ export default function SkillPostFeed({ editable = false }) {
                 onChange={(e) => setCommentInputs(e.target.value)}
               />
               <button
-                onClick={() => {
-                  handleAddComment(post.postId, commentInputs);
-                }}
+                onClick={() => handleAddComment(post.postId)}
                 className="posts__comment-submit"
               >
                 Post
@@ -276,6 +294,24 @@ export default function SkillPostFeed({ editable = false }) {
           </div>
         </div>
       )}
+
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Comment</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <textarea
+            className="form-control"
+            rows="4"
+            value={editComment}
+            onChange={(e) => setEditComment(e.target.value)}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowEditModal(false)}>Cancel</Button>
+          <Button variant="primary" onClick={handleSaveEditedComment}>Save</Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
