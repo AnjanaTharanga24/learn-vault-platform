@@ -23,7 +23,7 @@ export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
       <div className="container-fluid">
-        <Link className="navbar-brand d-flex align-items-center" to="/">
+        <Link className="navbar-brand d-flex align-items-center" to="/home">
           <i className="fas fa-share-alt text-primary me-2 fs-3"></i>
           <span className="fw-bold text-primary">SkillShare</span>
         </Link>
