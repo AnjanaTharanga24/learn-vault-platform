@@ -1,17 +1,24 @@
 import React, { useContext, useState } from "react";
 import "./navbar.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import profileImg from "../../assets/images/profile.png";
 import { UserContext } from "../../common/UserContext";
 
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const { user, logout } = useContext(UserContext);
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Searching for:", searchQuery);
   };
+
+
+  if (!user) {
+    navigate("/");
+    return null;
+  }
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
