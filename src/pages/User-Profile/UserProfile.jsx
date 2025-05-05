@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import "./userprofile.css";
 import Posts from "../../components/Skill-Sharing-Post/post/Posts";
 import Navbar from "../../components/Navbar/Navbar";
@@ -7,11 +7,175 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import { UserContext } from "../../common/UserContext";
 import LearningProgressPosts from "../../components/Learning-Progress-Post/post/LearningProgressPosts";
 import LearningPlanPosts from "../../components/Learning-Plan-Post/post/LearningPlanPosts";
+import { uploadToCloudinary } from "../../components/utils/uploadToCloudinary";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 function UserProfile() {
   const [isEditing, setIsEditing] = useState(false);
+  const { user, setUser } = useContext(UserContext);
+  const [error, setError] = useState("");
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    username: "",
+    email: "",
+    password: "",
+    imgUrl: ""
+  });
+  
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { user } = useContext(UserContext);
+  // Initialize form data when user data changes
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || "",
+        username: user.username || "",
+        email: user.email || "",
+        password: "",
+        imgUrl: user.imgUrl || ""
+      });
+    }
+  }, [user]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedImage(file);
+      
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        document.getElementById("profileImagePreview").src = loadEvent.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      let imageUrl = user.imgUrl;
+      
+      if (selectedImage) {
+        imageUrl = await uploadToCloudinary(selectedImage, "image");
+      }
+      
+      const updateData = {
+        name: formData.name,
+        username: formData.username,
+        email: formData.email,
+        imgUrl: imageUrl
+      };
+      
+      // Only include password if it's not empty
+      if (formData.password && formData.password.trim() !== "") {
+        updateData.password = formData.password;
+      }
+
+      const response = await axios.put(
+        `http://localhost:8080/api/v1/user/update/${user.id}`,
+        updateData,
+      );
+      
+      // Update the user context with the new data
+      setUser({
+        ...user,
+        name: response.data.name,
+        username: response.data.username,
+        email: response.data.email,
+        imgUrl: response.data.imgUrl
+      });
+      
+      setIsEditing(false);
+      
+      // Success alert
+      Swal.fire({
+        title: 'Success!',
+        text: 'Profile updated successfully!',
+        icon: 'success',
+        confirmButtonText: 'OK'
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      
+      let errorMessage = "Failed to update profile. Please try again.";
+      if (error.response && error.response.data) {
+        errorMessage = error.response.data.message || error.response.data || errorMessage;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
+      
+      // Error alert
+      Swal.fire({
+        title: 'Error!',
+        text: errorMessage,
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    // Show confirmation dialog before canceling
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You will lose all unsaved changes.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, discard changes!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Reset form data to current user data
+        setFormData({
+          name: user.name || "",
+          username: user.username || "",
+          email: user.email || "",
+          password: "",
+          imgUrl: user.imgUrl || ""
+        });
+        setSelectedImage(null);
+        setError("");
+        setIsEditing(false);
+        
+        Swal.fire(
+          'Changes discarded!',
+          'Your profile edit has been canceled.',
+          'success'
+        );
+      }
+    });
+  };
+
+  // If user data hasn't loaded yet
+  if (!user || !user.id) {
+    return (
+      <div className="loading">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -30,34 +194,48 @@ function UserProfile() {
                     <button
                       className="edit-profile-btn"
                       onClick={() => setIsEditing(true)}
+                      disabled={isLoading}
                     >
                       Edit Profile
                     </button>
                   )}
                 </div>
 
+                {error && (
+                  <div className="alert alert-danger" role="alert">
+                    {error}
+                  </div>
+                )}
+
                 {isEditing ? (
                   <div className="edit-profile-form">
                     <div className="profile-image-wrapper edit-mode">
                       <img
-                        src={user.imgUrl}
+                        id="profileImagePreview"
+                        src={user.imgUrl || "https://via.placeholder.com/150"}
                         alt="Profile"
                         className="profile-image"
                       />
                       <label className="upload-button">
                         Change Photo
-                        <input type="file" style={{ display: "none" }} />
+                        <input 
+                          type="file" 
+                          style={{ display: "none" }} 
+                          onChange={handleImageChange}
+                          accept="image/*"
+                        />
                       </label>
                     </div>
 
-                    <form>
+                    <form onSubmit={handleSubmit}>
                       <div className="form-group">
                         <label htmlFor="name">Full Name</label>
                         <input
                           type="text"
                           id="name"
                           name="name"
-                          value={user.name}
+                          value={formData.name}
+                          onChange={handleInputChange}
                           className="form-control"
                           required
                         />
@@ -69,7 +247,8 @@ function UserProfile() {
                           type="text"
                           id="username"
                           name="username"
-                          value={user.username}
+                          value={formData.username}
+                          onChange={handleInputChange}
                           className="form-control"
                           required
                         />
@@ -81,7 +260,8 @@ function UserProfile() {
                           type="email"
                           id="email"
                           name="email"
-                          value={user.email}
+                          value={formData.email}
+                          onChange={handleInputChange}
                           className="form-control"
                           required
                         />
@@ -95,18 +275,30 @@ function UserProfile() {
                           type="password"
                           id="password"
                           name="password"
+                          value={formData.password}
+                          onChange={handleInputChange}
                           className="form-control"
                         />
                       </div>
 
                       <div className="form-actions">
-                        <button type="submit" className="save-btn">
-                          Save Changes
+                        <button 
+                          type="submit" 
+                          className="save-btn"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? (
+                            <>
+                              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                              Saving...
+                            </>
+                          ) : "Save Changes"}
                         </button>
                         <button
                           type="button"
                           className="cancel-btn"
-                          onClick={() => setIsEditing(false)}
+                          onClick={handleCancel}
+                          disabled={isLoading}
                         >
                           Cancel
                         </button>
@@ -118,7 +310,7 @@ function UserProfile() {
                     <div className="profile-top">
                       <div className="profile-image-wrapper">
                         <img
-                          src={user.imgUrl}
+                          src={user.imgUrl || "https://via.placeholder.com/150"}
                           alt="Profile"
                           className="profile-image"
                         />
