@@ -7,6 +7,7 @@ import axios from 'axios';
 import { UserContext } from '../../../common/UserContext';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import { FaThumbsUp, FaCommentDots, FaShare } from 'react-icons/fa';
 import './skillPostFeed.css';
 
 export default function SkillPostFeed({ editable = false }) {
@@ -117,11 +118,10 @@ export default function SkillPostFeed({ editable = false }) {
   };
 
   const handleSaveEditedComment = async () => {
-
-    const id = user?.id
+    const id = user?.id;
     try {
-      await axios.put(`http://localhost:8080/api/v1/comment?postId=${editPostId}&userId=${id}&commentId=${editCommentId}`,{
-        comment:editComment
+      await axios.put(`http://localhost:8080/api/v1/comment?postId=${editPostId}&userId=${id}&commentId=${editCommentId}`, {
+        comment: editComment
       });
       setShowEditModal(false);
       setEditComment('');
@@ -213,6 +213,18 @@ export default function SkillPostFeed({ editable = false }) {
           <div className="posts__body">
             <p className="posts__description">{post.description}</p>
             {renderPostMedia(post)}
+          </div>
+
+          <div className="posts__actions enhanced-actions">
+            <button className="posts__action-btn">
+              <FaThumbsUp /> Like
+            </button>
+            <button className="posts__action-btn">
+              <FaCommentDots /> Comment
+            </button>
+            <button className="posts__action-btn">
+              <FaShare /> Share
+            </button>
           </div>
 
           <div className="posts__comments styled-comments">
