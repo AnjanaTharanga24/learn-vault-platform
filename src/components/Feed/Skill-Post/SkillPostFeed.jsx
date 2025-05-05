@@ -36,19 +36,6 @@ export default function SkillPostFeed({ editable = false }) {
     fetchPosts();
   }, []);
 
-  const fetchComments = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(API_BASE_URL + 'feed');
-      setPosts(response.data);
-    } catch (err) {
-      console.error('Error fetching posts:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const isVideo = (url) => {
     if (!url) return false;
     return url.match(/\.(mp4|webm|ogg)$/i);
