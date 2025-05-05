@@ -319,7 +319,6 @@ function UserProfile() {
                         <h2 className="user-name">{user.name}</h2>
                         <p className="username">@{user.username}</p>
                         <p className="email">{user.email}</p>
-                        <button className="follow-btn">Follow +</button>
                       </div>
                     </div>
                   </div>
