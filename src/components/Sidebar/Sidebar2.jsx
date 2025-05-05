@@ -11,6 +11,22 @@ export default function Sidebar2() {
   const { user } = useContext(UserContext);
   const [learningPlans, setLearningPlans] = useState([]);
 
+  const [getUser , setGetUser] = useState();
+
+  useEffect(() => {
+    getUserById();
+  }, []);
+
+  const getUserById = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/v1/user/${user.id}`);
+      setGetUser(response.data);
+      console.log("get user by id : " , response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const recommendedUsers = [
     { id: 1, name: 'Sarah Parker', image: profileImg, skills: ['Photography', 'Editing'] },
     { id: 2, name: 'David Kim', image: profileImg, skills: ['Cooking', 'Baking'] },
@@ -131,7 +147,7 @@ export default function Sidebar2() {
       <div className="user-profile p-3 border-bottom">
         <div className="d-flex align-items-center mb-3">
           <img 
-            src={user?.imgUrl || profileImg} 
+            src={getUser?.imgUrl || profileImg} 
             alt="Profile" 
             className="rounded-circle me-3"
             width={50}
@@ -241,15 +257,6 @@ export default function Sidebar2() {
           <div className="text-center py-4 bg-light rounded">
             <BookOpen size={32} className="text-muted mb-2" />
             <h6 className="text-muted mb-3">No learning plans yet</h6>
-            <Link 
-              to="/create-learning-plan" 
-              className="btn btn-primary d-flex align-items-center justify-content-center mx-auto"
-              style={{ maxWidth: '150px' }}
-            >
-              <PlusCircle size={16} className="me-1" />
-              Create Plan
-
-            </Link>
           </div>
         )}
       </div>

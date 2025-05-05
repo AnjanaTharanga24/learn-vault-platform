@@ -15,6 +15,22 @@ function UserProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const { user, setUser } = useContext(UserContext);
   const [error, setError] = useState("");
+
+  const [getUser , setGetUser] = useState();
+
+  useEffect(() => {
+    getUserById();
+  }, []);
+
+  const getUserById = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/v1/user/${user.id}`);
+      setGetUser(response.data);
+      console.log("get user by id : " , response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   
   const [formData, setFormData] = useState({
     name: "",
@@ -27,7 +43,6 @@ function UserProfile() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Initialize form data when user data changes
   useEffect(() => {
     if (user) {
       setFormData({
@@ -80,7 +95,6 @@ function UserProfile() {
         imgUrl: imageUrl
       };
       
-      // Only include password if it's not empty
       if (formData.password && formData.password.trim() !== "") {
         updateData.password = formData.password;
       }
@@ -90,7 +104,6 @@ function UserProfile() {
         updateData,
       );
       
-      // Update the user context with the new data
       setUser({
         ...user,
         name: response.data.name,
@@ -101,7 +114,6 @@ function UserProfile() {
       
       setIsEditing(false);
       
-      // Success alert
       Swal.fire({
         title: 'Success!',
         text: 'Profile updated successfully!',
@@ -120,7 +132,6 @@ function UserProfile() {
       
       setError(errorMessage);
       
-      // Error alert
       Swal.fire({
         title: 'Error!',
         text: errorMessage,
@@ -133,7 +144,6 @@ function UserProfile() {
   };
 
   const handleCancel = () => {
-    // Show confirmation dialog before canceling
     Swal.fire({
       title: 'Are you sure?',
       text: 'You will lose all unsaved changes.',
@@ -144,7 +154,6 @@ function UserProfile() {
       confirmButtonText: 'Yes, discard changes!'
     }).then((result) => {
       if (result.isConfirmed) {
-        // Reset form data to current user data
         setFormData({
           name: user.name || "",
           username: user.username || "",
@@ -165,7 +174,6 @@ function UserProfile() {
     });
   };
 
-  // If user data hasn't loaded yet
   if (!user || !user.id) {
     return (
       <div className="loading">
@@ -310,7 +318,7 @@ function UserProfile() {
                     <div className="profile-top">
                       <div className="profile-image-wrapper">
                         <img
-                          src={user.imgUrl || "https://via.placeholder.com/150"}
+                          src={getUser?.imgUrl}
                           alt="Profile"
                           className="profile-image"
                         />

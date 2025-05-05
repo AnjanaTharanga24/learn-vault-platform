@@ -1,13 +1,30 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "./navbar.css";
 import { Link, useNavigate } from "react-router-dom";
 import profileImg from "../../assets/images/profile.png";
 import { UserContext } from "../../common/UserContext";
+import axios from "axios";
 
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const { user, logout } = useContext(UserContext);
   const navigate = useNavigate();
+
+  const [getUser , setGetUser] = useState();
+
+  useEffect(() => {
+    getUserById();
+  }, []);
+
+  const getUserById = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/v1/user/${user.id}`);
+      setGetUser(response.data);
+      console.log("get user by id : " , response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -23,7 +40,7 @@ export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
       <div className="container-fluid">
-        <Link className="navbar-brand d-flex align-items-center" to="/home">
+        <Link className="navbar-brand d-flex align-items-center" to="/">
           <i className="fas fa-share-alt text-primary me-2 fs-3"></i>
           <span className="fw-bold text-primary">SkillShare</span>
         </Link>
@@ -84,7 +101,7 @@ export default function Navbar() {
                     aria-expanded="false"
                   >
                     <img 
-                      src={user.imgUrl || profileImg}
+                      src={getUser?.imgUrl || profileImg}
                       alt="Profile" 
                       className="rounded-circle me-md-2" 
                       width="32" 
