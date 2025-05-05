@@ -19,7 +19,7 @@ export default function Posts({ editable = false }) {
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [currentPost, setCurrentPost] = useState(null);
 
-  const API_BASE_URL = `http://localhost:8080/api/v1/posts/${user.id}`; 
+  const API_BASE_URL = `http://localhost:8080/api/v1/posts/${user?.id}`; 
 
   useEffect(() => {
     const fetchPosts = async () => {

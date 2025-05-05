@@ -210,7 +210,7 @@ export default function SkillSharingPostModal({ show, handleClose, onPostCreated
         <button 
           className="btn btn-primary w-100"
           onClick={handleSubmit}
-          disabled={!description || (images.length === 0 && !video) || isLoading}
+          disabled={!description || (images?.length === 0 && !video) || isLoading}
         >
           {isLoading ? 'Posting...' : 'Post'}
         </button>
