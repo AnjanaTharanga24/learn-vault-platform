@@ -75,10 +75,6 @@ export default function Home() {
 
             <SkillPostFeed/>
             <LearningPlanPostFeed/>
-            <LearningProgressPostFeed/>
-            {/* <Posts />
-            <LearningProgressPosts/>
-            <LearningPlanPosts/> */}
           </div>
         </div>
         <div className="col-lg-2">

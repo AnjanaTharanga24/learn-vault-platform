@@ -1,105 +1,261 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom';
 import './sidebar.css'
 import profileImg from '../../assets/images/profile.png'
 import { UserContext } from '../../common/UserContext';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+import { BookOpen, Calendar, Clock, ChevronRight, PlusCircle, Award } from 'lucide-react';
 
 export default function Sidebar2() {
+  const { user } = useContext(UserContext);
+  const [learningPlans, setLearningPlans] = useState([]);
+  
+  const recommendedUsers = [
+    { id: 1, name: 'Sarah Parker', image: profileImg, skills: ['Photography', 'Editing'] },
+    { id: 2, name: 'David Kim', image: profileImg, skills: ['Cooking', 'Baking'] },
+    { id: 3, name: 'Alex Johnson', image: profileImg, skills: ['Web Dev', 'UX Design'] }
+  ];
 
-  const {user} = useContext(UserContext);
-    const recommendedUsers = [
-        { id: 1, name: 'Sarah Parker', image: profileImg, skills: ['Photography', 'Editing'] },
-        { id: 2, name: 'David Kim', image: profileImg, skills: ['Cooking', 'Baking'] },
-        { id: 3, name: 'Alex Johnson', image: profileImg, skills: ['Web Dev', 'UX Design'] }
-      ];
+  const popularSkills = [
+    { id: 1, name: 'Web Development', icon: 'fa-code' },
+    { id: 2, name: 'Photography', icon: 'fa-camera' },
+    { id: 3, name: 'Cooking', icon: 'fa-utensils' },
+    { id: 4, name: 'Graphic Design', icon: 'fa-palette' },
+    { id: 5, name: 'Digital Marketing', icon: 'fa-chart-line' }
+  ];
+
+  useEffect(() => {
+    const fetchLearningPlans = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/v1/learning/plans/${user.id}`
+        );
+
+        const transformedData = response.data.map((plan) => ({
+          id: plan.id,
+          title: plan.title,
+          status: plan.status,
+          startDate: formatDate(plan.startDate),
+          endDate: formatDate(plan.endDate),
+          daysRemaining: calculateDaysRemaining(plan.endDate),
+          progress: calculateProgress(plan.startDate, plan.endDate),
+          topics: plan.topics,
+          resources: plan.resources,
+        }));
+
+        setLearningPlans(transformedData.slice(0, 3)); // Show only first 3 plans
+      } catch (err) {
+        console.log(err);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load learning plans",
+        });
+      }
+    };
+
+    if (user.id) {
+      fetchLearningPlans();
+    }
+  }, [user.id]);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const calculateDaysRemaining = (endDateString) => {
+    if (!endDateString) return 0;
+    const endDate = new Date(endDateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffTime = endDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
+  const calculateProgress = (startDateString, endDateString) => {
+    if (!startDateString || !endDateString) return 0;
     
-      const popularSkills = [
-        { id: 1, name: 'Web Development', icon: 'fa-code' },
-        { id: 2, name: 'Photography', icon: 'fa-camera' },
-        { id: 3, name: 'Cooking', icon: 'fa-utensils' },
-        { id: 4, name: 'Graphic Design', icon: 'fa-palette' },
-        { id: 5, name: 'Digital Marketing', icon: 'fa-chart-line' }
-      ];
+    const startDate = new Date(startDateString);
+    const endDate = new Date(endDateString);
+    const today = new Date();
     
-      const userSkills = [
-        { id: 1, name: 'JavaScript', progress: 80 },
-        { id: 2, name: 'React.js', progress: 65 },
-        { id: 3, name: 'Photography', progress: 45 },
-      ];
+    const totalDuration = endDate - startDate;
+    const elapsedDuration = today - startDate;
     
-      return (
-        <div className="right-sidebar bg-white shadow-sm">
-          <div className="user-profile p-3 border-bottom">
-            <div className="d-flex align-items-center mb-3">
-              <img 
-                src={user.imgUrl} 
-                alt="Profile" 
-                className="rounded-circle me-3"
-                width={50}
-              />
-              <div>
-                <h6 className="mb-0">{user.name}</h6>
-                <small className="text-muted">{user.username}</small>
-              </div>
-            </div>
-            
-            <div className="d-flex justify-content-around text-center">
-              <div>
-                <div className="fw-bold">0</div>
-                <small className="text-muted">Posts</small>
-              </div>
-              <div>
-                <div className="fw-bold">0</div>
-                <small className="text-muted">Followers</small>
-              </div>
-              <div>
-                <div className="fw-bold"> 0</div>
-                <small className="text-muted">Following</small>
-              </div>
-            </div>
+    if (elapsedDuration <= 0) return 0;
+    if (elapsedDuration >= totalDuration) return 100;
+    
+    return Math.round((elapsedDuration / totalDuration) * 100);
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "NOT_STARTED":
+        return "#e74c3c";
+      case "IN_PROGRESS":
+        return "#f39c12";
+      case "COMPLETED":
+        return "#2ecc71";
+      default:
+        return "#95a5a6";
+    }
+  };
+
+  const getStatusText = (status) => {
+    return status.replace("_", " ");
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "NOT_STARTED":
+        return <Clock size={14} />;
+      case "IN_PROGRESS":
+        return <BookOpen size={14} />;
+      case "COMPLETED":
+        return <Award size={14} />;
+      default:
+        return <Clock size={14} />;
+    }
+  };
+
+  return (
+    <div className="right-sidebar bg-white shadow-sm">
+      <div className="user-profile p-3 border-bottom">
+        <div className="d-flex align-items-center mb-3">
+          <img 
+            src={user.imgUrl} 
+            alt="Profile" 
+            className="rounded-circle me-3"
+            width={50}
+          />
+          <div>
+            <h6 className="mb-0">{user.name}</h6>
+            <small className="text-muted">{user.username}</small>
           </div>
-          
-          <div className="p-3 border-bottom">
-            <h6 className="mb-3">My Learning Progress</h6>
-            {userSkills.map(skill => (
-              <div key={skill.id} className="mb-3">
-                <div className="d-flex justify-content-between mb-1">
-                  <small>{skill.name}</small>
-                  <small>{skill.progress}%</small>
-                </div>
-                <div className="progress" style={{ height: '6px' }}>
-                  <div 
-                    className="progress-bar bg-primary" 
-                    role="progressbar" 
-                    style={{ width: `${skill.progress}%` }}
-                    aria-valuenow={skill.progress} 
-                    aria-valuemin="0" 
-                    aria-valuemax="100">
+        </div>
+        
+        <div className="d-flex justify-content-around text-center">
+          <div>
+            <div className="fw-bold">0</div>
+            <small className="text-muted">Posts</small>
+          </div>
+          <div>
+            <div className="fw-bold">0</div>
+            <small className="text-muted">Followers</small>
+          </div>
+          <div>
+            <div className="fw-bold">0</div>
+            <small className="text-muted">Following</small>
+          </div>
+        </div>
+      </div>
+      
+      {/* Redesigned Learning Plans Section */}
+      <div className="p-3 border-bottom">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h6 className="mb-0 d-flex align-items-center">
+            <BookOpen size={16} className="me-2" />
+            My Learning Plans
+          </h6>
+         
+        </div>
+        
+        {learningPlans.length > 0 ? (
+          <div className="learning-plans-list">
+            {learningPlans.map(plan => (
+              <div key={plan.id} className="card mb-3 border-0 shadow-sm">
+                <div className="card-body p-3">
+                  {/* Progress indicator at the top */}
+                  {plan.status === "IN_PROGRESS" && (
+                    <div className="progress mb-2" style={{ height: '6px' }}>
+                      <div 
+                        className="progress-bar" 
+                        role="progressbar" 
+                        style={{ 
+                          width: `${plan.progress}%`,
+                          backgroundColor: getStatusColor(plan.status)
+                        }}
+                        aria-valuenow={plan.progress} 
+                        aria-valuemin="0" 
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                  )}
+                  
+                  <div className="d-flex justify-content-between align-items-start">
+                    <h6 className="card-title mb-2">{plan.title}</h6>
+                    <div 
+                      className="badge rounded-pill d-flex align-items-center"
+                      style={{
+                        backgroundColor: `${getStatusColor(plan.status)}20`,
+                        color: getStatusColor(plan.status),
+                        padding: '5px 8px'
+                      }}
+                    >
+                      <span className="me-1">{getStatusIcon(plan.status)}</span>
+                      {getStatusText(plan.status)}
+                    </div>
                   </div>
+                  
+                  <div className="d-flex align-items-center text-muted mb-2 small">
+                    <Calendar size={14} className="me-1" />
+                    <span className="me-2">{plan.startDate}</span>
+                    <span>→</span>
+                    <span className="ms-2">{plan.endDate}</span>
+                  </div>
+                  
+                  {plan.daysRemaining > 0 && plan.status !== "COMPLETED" && (
+                    <div className="d-flex align-items-center small mb-2">
+                      <Clock size={14} className="me-1 text-warning" />
+                      <span className="text-warning">{plan.daysRemaining} days remaining</span>
+                    </div>
+                  )}
+                  
+                  <div className="mt-2">
+                    {plan.topics.map((topic, index) => (
+                      <span 
+                        key={index} 
+                        className="badge me-1 mb-1"
+                        style={{
+                          backgroundColor: '#f8f9fa',
+                          color: '#495057',
+                          border: '1px solid #dee2e6',
+                          fontWeight: 'normal'
+                        }}
+                      >
+                        {topic}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  
                 </div>
               </div>
             ))}
-            <Link to="/learning-progress" className="btn btn-outline-primary btn-sm w-100 mt-2">
-              View All Progress
+          </div>
+        ) : (
+          <div className="text-center py-4 bg-light rounded">
+            <BookOpen size={32} className="text-muted mb-2" />
+            <h6 className="text-muted mb-3">No learning plans yet</h6>
+            <Link 
+              to="/create-learning-plan" 
+              className="btn btn-primary d-flex align-items-center justify-content-center mx-auto"
+              style={{ maxWidth: '150px' }}
+            >
+              <PlusCircle size={16} className="me-1" />
+              Create Plan
             </Link>
           </div>
-          
-          <div className="p-3 border-bottom">
-            <h6 className="mb-3">Popular Skills</h6>
-            <ul className="list-group list-group-flush">
-              {popularSkills.map(skill => (
-                <li key={skill.id} className="list-group-item px-0 py-2 border-0">
-                  <Link to={`/skills/${skill.id}`} className="text-decoration-none text-dark">
-                    <i className={`fas ${skill.icon} me-2 text-primary`}></i>
-                    {skill.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-            <Link to="/explore-skills" className="btn btn-outline-primary btn-sm w-100 mt-2">
-              Explore More Skills
-            </Link>
-          </div>
-        </div>
-      )
-    }
+        )}
+      </div>
+      
+     
+      
+      
+    </div>
+  )
+}
