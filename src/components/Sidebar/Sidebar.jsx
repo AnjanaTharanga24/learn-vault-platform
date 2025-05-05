@@ -209,7 +209,7 @@ export default function Sidebar() {
             </div>
             
             <div className="p-3">
-                <h6 className="mb-3">Recommended Developers</h6>
+                <h6 className="mb-3">Recommended Users</h6>
                 {loading.recommendations ? (
                     <div className="text-center py-3">
                         <div className="spinner-border spinner-border-sm text-primary" role="status">
@@ -254,7 +254,7 @@ export default function Sidebar() {
                             <div className="text-muted small">No recommendations available</div>
                         )}
                         <Link to="/follow" className="btn btn-outline-primary btn-sm w-100 mt-2">
-                            Find More Developers
+                            Find More Users
                         </Link>
                     </>
                 )}

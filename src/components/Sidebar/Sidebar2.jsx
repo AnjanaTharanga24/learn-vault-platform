@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import './sidebar.css'
-import profileImg from '../../assets/images/profile.png'
+import './sidebar.css';
+import profileImg from '../../assets/images/profile.png';
 import { UserContext } from '../../common/UserContext';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -10,7 +10,7 @@ import { BookOpen, Calendar, Clock, ChevronRight, PlusCircle, Award } from 'luci
 export default function Sidebar2() {
   const { user } = useContext(UserContext);
   const [learningPlans, setLearningPlans] = useState([]);
-  
+
   const recommendedUsers = [
     { id: 1, name: 'Sarah Parker', image: profileImg, skills: ['Photography', 'Editing'] },
     { id: 2, name: 'David Kim', image: profileImg, skills: ['Cooking', 'Baking'] },
@@ -26,6 +26,8 @@ export default function Sidebar2() {
   ];
 
   useEffect(() => {
+    if (!user?.id) return;
+
     const fetchLearningPlans = async () => {
       try {
         const response = await axios.get(
@@ -44,7 +46,7 @@ export default function Sidebar2() {
           resources: plan.resources,
         }));
 
-        setLearningPlans(transformedData.slice(0, 3)); // Show only first 3 plans
+        setLearningPlans(transformedData.slice(0, 3));
       } catch (err) {
         console.log(err);
         Swal.fire({
@@ -55,10 +57,8 @@ export default function Sidebar2() {
       }
     };
 
-    if (user.id) {
-      fetchLearningPlans();
-    }
-  }, [user.id]);
+    fetchLearningPlans();
+  }, [user?.id]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -78,17 +78,17 @@ export default function Sidebar2() {
 
   const calculateProgress = (startDateString, endDateString) => {
     if (!startDateString || !endDateString) return 0;
-    
+
     const startDate = new Date(startDateString);
     const endDate = new Date(endDateString);
     const today = new Date();
-    
+
     const totalDuration = endDate - startDate;
     const elapsedDuration = today - startDate;
-    
+
     if (elapsedDuration <= 0) return 0;
     if (elapsedDuration >= totalDuration) return 100;
-    
+
     return Math.round((elapsedDuration / totalDuration) * 100);
   };
 
@@ -122,19 +122,23 @@ export default function Sidebar2() {
     }
   };
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="right-sidebar bg-white shadow-sm">
       <div className="user-profile p-3 border-bottom">
         <div className="d-flex align-items-center mb-3">
           <img 
-            src={user.imgUrl} 
+            src={user?.imgUrl || profileImg} 
             alt="Profile" 
             className="rounded-circle me-3"
             width={50}
           />
           <div>
-            <h6 className="mb-0">{user.name}</h6>
-            <small className="text-muted">{user.username}</small>
+            <h6 className="mb-0">{user?.name || 'Guest User'}</h6>
+            <small className="text-muted">{user?.username || ''}</small>
           </div>
         </div>
         
@@ -154,14 +158,12 @@ export default function Sidebar2() {
         </div>
       </div>
       
-      {/* Redesigned Learning Plans Section */}
       <div className="p-3 border-bottom">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h6 className="mb-0 d-flex align-items-center">
             <BookOpen size={16} className="me-2" />
             My Learning Plans
           </h6>
-         
         </div>
         
         {learningPlans.length > 0 ? (
@@ -169,7 +171,6 @@ export default function Sidebar2() {
             {learningPlans.map(plan => (
               <div key={plan.id} className="card mb-3 border-0 shadow-sm">
                 <div className="card-body p-3">
-                  {/* Progress indicator at the top */}
                   {plan.status === "IN_PROGRESS" && (
                     <div className="progress mb-2" style={{ height: '6px' }}>
                       <div 
@@ -231,8 +232,6 @@ export default function Sidebar2() {
                       </span>
                     ))}
                   </div>
-                  
-                  
                 </div>
               </div>
             ))}
@@ -253,9 +252,6 @@ export default function Sidebar2() {
         )}
       </div>
       
-     
-      
-      
     </div>
-  )
+  );
 }
