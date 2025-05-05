@@ -77,7 +77,7 @@ export default function Navbar() {
                     aria-expanded="false"
                   >
                     <img 
-                      src={user.profilePicture || profileImg}
+                      src={user.imgUrl || profileImg}
                       alt="Profile" 
                       className="rounded-circle me-md-2" 
                       width="32" 

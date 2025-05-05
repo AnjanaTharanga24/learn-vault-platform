@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Link } from 'react-router-dom';
 import './sidebar.css'
 import profileImg from '../../assets/images/profile.png'
+import { UserContext } from '../../common/UserContext';
 
 export default function Sidebar2() {
+
+  const {user} = useContext(UserContext);
     const recommendedUsers = [
         { id: 1, name: 'Sarah Parker', image: profileImg, skills: ['Photography', 'Editing'] },
         { id: 2, name: 'David Kim', image: profileImg, skills: ['Cooking', 'Baking'] },
@@ -29,14 +32,14 @@ export default function Sidebar2() {
           <div className="user-profile p-3 border-bottom">
             <div className="d-flex align-items-center mb-3">
               <img 
-                src={profileImg} 
+                src={user.imgUrl} 
                 alt="Profile" 
                 className="rounded-circle me-3"
                 width={50}
               />
               <div>
-                <h6 className="mb-0">User</h6>
-                <small className="text-muted">username</small>
+                <h6 className="mb-0">{user.name}</h6>
+                <small className="text-muted">{user.username}</small>
               </div>
             </div>
             
