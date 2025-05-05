@@ -1,152 +1,206 @@
-/* Main container styles */
-.main-content {
+/* Follow Users Page Styling */
+.follow-users-page {
     background-color: #f0f2f5;
     min-height: 100vh;
 }
 
-/* Facebook-style grid layout */
-.user-grid.facebook-style-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    padding: 0 8px;
-    max-width: 800px; /* Optional: to prevent cards from getting too wide */
-    margin: 0 auto; /* Center the grid */
+.main-content {
+    padding-top: 60px; /* To account for fixed navbar */
 }
 
-/* Facebook-style user card */
+/* Refresh button styling */
+.refresh-btn {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    transition: all 0.2s;
+    border: 1px solid #dadde1;
+}
+
+.refresh-btn:hover {
+    background-color: #e4e6eb;
+}
+
+.refresh-btn i {
+    margin-right: 5px;
+}
+
+/* Facebook-style User Grid */
+.user-grid.facebook-style-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* User Card Styling */
 .user-card.facebook-style {
-    position: relative;
-    border: 1px solid #dddfe2;
+    background-color: white;
     border-radius: 8px;
-    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     overflow: hidden;
-    transition: box-shadow 0.3s ease;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .user-card.facebook-style:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.user-card.facebook-style .user-card-header {
-    height: 100px;
+.user-card-header {
     position: relative;
-    background: #f0f2f5;
-    display: block;
+    height: 100px;
 }
 
-.user-card.facebook-style .user-cover-photo {
+.user-cover-photo {
     width: 100%;
-    height: 100%;
+    height: 100px;
     object-fit: cover;
 }
 
-.user-card.facebook-style .user-cover-photo-placeholder {
+.user-cover-photo-placeholder {
     width: 100%;
-    height: 100%;
+    height: 100px;
     background: linear-gradient(135deg, #4568dc, #b06ab3);
 }
 
-.user-card.facebook-style .user-avatar-container {
+.user-avatar-container {
     position: absolute;
-    bottom: -25px;
+    bottom: -30px;
     left: 50%;
     transform: translateX(-50%);
-    border: 4px solid #fff;
-    border-radius: 50%;
-    background: #fff;
 }
 
-.user-card.facebook-style .user-avatar {
-    width: 60px;
-    height: 60px;
+.user-avatar {
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
+    border: 4px solid white;
     object-fit: cover;
+    background-color: white;
 }
 
-.user-card.facebook-style .user-avatar-placeholder {
-    width: 60px;
-    height: 60px;
+.user-avatar-placeholder {
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
+    border: 4px solid white;
+    background-color: #1877f2;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #e4e6eb;
-    color: #333;
-    font-size: 1.5rem;
+    font-size: 24px;
     font-weight: bold;
 }
 
-.user-card.facebook-style .user-card-body {
-    padding: 35px 12px 12px;
+.user-card-body {
+    padding: 40px 15px 15px;
     text-align: center;
 }
 
-.user-card.facebook-style .user-name {
-    margin: 0 0 4px;
-    font-size: 15px;
+.user-name {
     font-weight: 600;
-    color: #050505;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin-bottom: 10px;
+    font-size: 16px;
 }
 
-.user-card.facebook-style .mutual-friends {
-    margin: 0 0 12px;
-    font-size: 12px;
-    color: #65676b;
-    min-height: 15px;
-}
-
-.user-card.facebook-style .action-buttons {
+.action-buttons {
     display: flex;
-    gap: 5px;
-    margin-top: 10px;
+    justify-content: center;
+    margin-top: 15px;
+    gap: 8px;
 }
 
-.user-card.facebook-style .add-friend-btn {
-    flex: 1;
-    background-color: #1b74e4;
+.follow-btn {
+    background-color: #1877f2;
     color: white;
     border: none;
     border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 13px;
+    padding: 8px 16px;
     font-weight: 600;
+    flex-grow: 1;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
-.user-card.facebook-style .add-friend-btn:hover {
+.follow-btn:hover {
     background-color: #166fe5;
 }
 
-.user-card.facebook-style .add-friend-btn.friend-requested {
-    background-color: #e4e6eb;
-    color: #050505;
+.follow-btn:disabled {
+    background-color: #8bb4f1;
+    cursor: not-allowed;
 }
 
-.user-card.facebook-style .remove-btn {
-    width: 36px;
+.following-btn {
     background-color: #e4e6eb;
     color: #050505;
     border: none;
     border-radius: 6px;
-    padding: 8px;
-    font-size: 13px;
+    padding: 8px 16px;
+    font-weight: 600;
+    flex-grow: 1;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.following-btn:hover {
+    background-color: #f2f0f5;
+    color: #fe294d;
+}
+
+.following-btn:disabled {
+    background-color: #f0f2f5;
+    color: #65676b;
+    cursor: not-allowed;
+}
+
+.remove-btn {
+    background-color: #e4e6eb;
+    color: #65676b;
+    border: none;
+    border-radius: 6px;
+    width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
-.user-card.facebook-style .remove-btn:hover {
+.remove-btn:hover {
     background-color: #d8dadf;
+    color: #050505;
+}
+
+.no-users-message {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    color: #65676b;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner-border {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    vertical-align: text-bottom;
+    border: 0.2em solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
 }
 
 /* Responsive adjustments */
 @media (max-width: 1200px) {
     .user-grid.facebook-style-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     }
 }
 
@@ -154,17 +208,35 @@
     .col-lg-8.main-content {
         padding: 0 15px;
     }
+    
+    .user-grid.facebook-style-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
 }
 
 @media (max-width: 768px) {
     .user-grid.facebook-style-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 15px;
+    }
+    
+    .user-card.facebook-style .user-card-header {
+        height: 90px;
+    }
+    
+    .user-cover-photo, .user-cover-photo-placeholder {
+        height: 90px;
+    }
+    
+    .user-avatar, .user-avatar-placeholder {
+        width: 60px;
+        height: 60px;
     }
 }
 
 @media (max-width: 576px) {
     .user-grid.facebook-style-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         gap: 12px;
     }
     
@@ -172,19 +244,30 @@
         height: 80px;
     }
     
-    .user-card.facebook-style .user-avatar {
-        width: 50px;
-        height: 50px;
+    .user-cover-photo, .user-cover-photo-placeholder {
+        height: 80px;
     }
     
-    .user-card.facebook-style .user-avatar-placeholder {
+    .user-avatar, .user-avatar-placeholder {
         width: 50px;
         height: 50px;
-        font-size: 1.2rem;
+        font-size: 20px;
     }
     
     .user-card.facebook-style .user-card-body {
-        padding: 30px 8px 8px;
+        padding: 30px 8px 12px;
+    }
+    
+    .action-buttons {
+        gap: 6px;
+    }
+    
+    .follow-btn, .following-btn {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    
+    .remove-btn {
+        width: 30px;
     }
 }
-
