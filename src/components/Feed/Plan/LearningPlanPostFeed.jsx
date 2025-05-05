@@ -3,10 +3,20 @@ import profileImg from '../../../assets/images/profile.png';
 import '../../Learning-Plan-Post/post/learningPlanPosts.css'; 
 import axios from 'axios';
 import { UserContext } from '../../../common/UserContext';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import { FaThumbsUp, FaCommentDots, FaShare } from 'react-icons/fa';
+import './learningPlanPostFeed.css';
 
 export default function LearningPlanPostFeed() {
   const [learningPlans, setLearningPlans] = useState([]);
-const [planUser , setPlanUser] = useState({});
+  const [planUser, setPlanUser] = useState({});
+  const { user } = useContext(UserContext);
+  const [commentInputs, setCommentInputs] = useState({});
+  const [editComment, setEditComment] = useState('');
+  const [editCommentId, setEditCommentId] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editPlanId, setEditPlanId] = useState(null);
 
   useEffect(() => {
     getAllLearningPlans();
@@ -14,7 +24,7 @@ const [planUser , setPlanUser] = useState({});
 
   const getAllLearningPlans = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/api/v1/learning/plan/feed`);
+      const response = await axios.get("http://localhost:8080/api/v1/learning/plan/feed");
       
       const transformedData = await Promise.all(
         response.data.map(async (plan) => {
@@ -37,6 +47,7 @@ const [planUser , setPlanUser] = useState({});
               topics: plan.topics || [],
               resources: plan.resources || [],
               timestamp: formatTimestamp(plan.createdAt),
+              comments: plan.comments
             };
           } catch (userErr) {
             console.error('Error fetching user data:', userErr);
@@ -55,6 +66,7 @@ const [planUser , setPlanUser] = useState({});
               topics: plan.topics || [],
               resources: plan.resources || [],
               timestamp: formatTimestamp(plan.createdAt),
+              comments: plan.comments
             };
           }
         })
@@ -88,6 +100,56 @@ const [planUser , setPlanUser] = useState({});
     }
   };
 
+  // Comment handling functions
+  const handleAddComment = async (planId) => {
+    const id = user?.id;
+    try {
+      const response = await axios.post(`http://localhost:8080/api/v1/learning/comment?id=${planId}`, {
+        userId: id,
+        comment: commentInputs[planId] || ''
+      });
+      console.log(response, 'comment added');
+      getAllLearningPlans(); // Refresh to get updated comments
+      setCommentInputs(prev => ({ ...prev, [planId]: '' }));
+    } catch (e) {
+      console.log(e, 'comment add error');
+    }
+  };
+
+  const handleDeleteComment = async(planId, commentId) => {
+    const id = user?.id;
+    try {
+      const response = await axios.delete(`http://localhost:8080/api/v1/learning/comment?id=${planId}&userId=${id}&commentId=${commentId}`);
+      console.log(response, 'comment deleted');
+      getAllLearningPlans(); // Refresh to get updated comments
+    } catch (e) {
+      console.log(e, 'comment delete error');
+    }
+  };
+
+  const handleEditComment = (planId, commentId, existingComment) => {
+    setEditComment(existingComment);
+    setEditCommentId(commentId);
+    setEditPlanId(planId);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEditedComment = async () => {
+    const id = user?.id;
+
+    console.log(editComment,"ediiiiiiiiiiiiit")
+    try {
+      await axios.put(`http://localhost:8080/api/v1/learning/comment?id=${editPlanId}&userId=${id}&commentId=${editCommentId}`, {
+        comment: editComment
+      });
+      setShowEditModal(false);
+      setEditComment('');
+      getAllLearningPlans(); // Refresh to get updated comments
+    } catch (e) {
+      console.log(e, 'edit comment error');
+    }
+  };
+console.log(learningPlans,"plaans")
   return (
     <div className="learning-plan__container">
       {learningPlans.length > 0 ? (
@@ -101,7 +163,7 @@ const [planUser , setPlanUser] = useState({});
                   className="learning-plan__profile-pic"
                 />
                 <div className="learning-plan__name-info">
-                  <h6 className="learning-plan__user-name">{planUser.name}</h6>
+                  <h6 className="learning-plan__user-name">{planUser?.name}</h6>
                   <div className="learning-plan__timestamp">{plan.timestamp}</div>
                 </div>
               </div>
@@ -149,29 +211,84 @@ const [planUser , setPlanUser] = useState({});
                 </ul>
               </div>
             </div>
+
             <div className="learning-plan__footer">
-            <div className="learning-plan__action">
-              <i className="fas fa-thumbs-up"></i>
-              <span>Like</span>
+              <div className="learning-plan__action">
+                <FaThumbsUp />
+                <span>Like</span>
+              </div>
+              <div className="learning-plan__action">
+                <FaCommentDots />
+                <span>Comment</span>
+              </div>
+              <div className="learning-plan__action">
+                <FaShare />
+                <span>Share</span>
+              </div>
             </div>
-            <div className="learning-plan__action">
-              <i className="fas fa-comment"></i>
-              <span>Comment</span>
-            </div>
-            <div className="learning-plan__action">
-              <i className="fas fa-share"></i>
-              <span>Share</span>
+
+            {/* Comment Section */}
+            <div className="learning-plan__comments styled-comments">
+              {plan?.comments?.length > 0 ? (
+                plan?.comments.map((c, i) => (
+                  <div key={i} className="styled-comment">
+                    <div className="comment-user">
+                      <strong>{c?.user?.name}</strong>
+                      <span className="comment-text">{c?.comment}</span>
+                    </div>
+                    {c?.user.id === user?.id && (
+                      <div className="comment-actions">
+                        <button onClick={() => handleEditComment(plan.id, c.commentId, c.comment)}>Edit</button>
+                        <button onClick={() => handleDeleteComment(plan.id, c.commentId)}>Delete</button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="learning-plan__comment learning-plan__comment--empty">No comments yet.</div>
+              )}
+              <div className="learning-plan__comment-input-group styled-input-group">
+                <input
+                  type="text"
+                  placeholder="Write a comment..."
+                  className="styled-comment-input"
+                  value={commentInputs[plan.id] || ''}
+                  onChange={(e) => setCommentInputs(prev => ({ ...prev, [plan.id]: e.target.value }))}
+                />
+                <button
+                  onClick={() => handleAddComment(plan.id)}
+                  className="styled-comment-submit"
+                >
+                  Comment
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-         
-          
         ))
       ) : (
         <div className="learning-plan__empty-state">
           <p>No learning plans found. Create your first learning plan to get started!</p>
         </div>
       )}
+
+      {/* Edit Comment Modal */}
+      <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Comment</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <textarea
+            className="form-control"
+            rows="4"
+            value={editComment}
+            onChange={(e) => setEditComment(e.target.value)}
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowEditModal(false)}>Cancel</Button>
+          <Button variant="primary" onClick={handleSaveEditedComment}>Save</Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
