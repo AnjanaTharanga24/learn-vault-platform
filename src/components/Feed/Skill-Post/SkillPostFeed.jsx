@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import profileImg from '../../../assets/images/profile.png';
 import '../../Skill-Sharing-Post/post/posts.css';
 import editIcon from '../../../assets/images/edit.png';
 import deleteIcon from '../../../assets/images/delete.png';
 import axios from 'axios';
+import { UserContext } from '../../../common/UserContext';
 
 export default function SkillPostFeed({ editable = false }) {
   const [posts, setPosts] = useState([]);
+  //current user
+  const { user } = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [currentPostMedia, setCurrentPostMedia] = useState([]);
+  const [commentInputs, setCommentInputs] = useState({});
 
   const API_BASE_URL = 'http://localhost:8080/api/v1/'; 
 
@@ -31,6 +35,19 @@ export default function SkillPostFeed({ editable = false }) {
 
     fetchPosts();
   }, []);
+
+  const fetchComments = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(API_BASE_URL + 'feed');
+      setPosts(response.data);
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const isVideo = (url) => {
     if (!url) return false;
@@ -71,6 +88,17 @@ export default function SkillPostFeed({ editable = false }) {
 
   const handleUpdate = (postId) => {
     alert(`Update post ${postId} (connect to modal/form if needed)`);
+  };
+
+  const handleAddComment = (postId) => {
+    const newComment = commentInputs[postId]?.trim();
+    if (!newComment) return;
+    setPosts(prev => prev.map(post =>
+      post.postId === postId
+        ? { ...post, comments: [...(post.comments || []), { user: 'You', text: newComment }] }
+        : post
+    ));
+    setCommentInputs(prev => ({ ...prev, [postId]: '' }));
   };
 
   const renderPostMedia = (post) => {
@@ -121,21 +149,14 @@ export default function SkillPostFeed({ editable = false }) {
     );
   };
 
-  if (loading) {
-    return <div className="posts__loading">Loading posts...</div>;
-  }
+  if (loading) return <div className="posts__loading">Loading posts...</div>;
+  if (error) return <div className="posts__error">Error: {error}</div>;
+  if (posts.length === 0) return <div className="posts__empty">No posts to display</div>;
 
-  if (error) {
-    return <div className="posts__error">Error: {error}</div>;
-  }
-
-  if (posts.length === 0) {
-    return <div className="posts__empty">No posts to display</div>;
-  }
-
+  console.log(posts,"posts")
   return (
     <div className="posts__container">
-      {posts.map(post => (
+      {posts?.map(post => (
         <div key={post.postId} className="posts__card">
           {editable && (
             <div className="posts__edit-buttons">
@@ -165,16 +186,32 @@ export default function SkillPostFeed({ editable = false }) {
             {renderPostMedia(post)}
           </div>
 
-          <div className="posts__actions">
-            <button className="posts__action-btn">
-              👍 Like ({post.likes || 0})
-            </button>
-            <button className="posts__action-btn">
-              💬 Comment ({post.comments?.length || 0})
-            </button>
-            <button className="posts__action-btn">
-              ↗ Share
-            </button>
+          <div className="posts__comments">
+            {post.comments?.length > 0 ? (
+              post.comments.map((c, i) => (
+                <div key={i} className="posts__comment">
+                  <strong>{c?.user.name}:</strong> {c?.comment}
+                  {((c?.user.id === user.id)||(c?.user.username == post.username) ) && (
+                    <span className="posts__comment-actions">
+                      <button className="posts__comment-edit">Edit</button>
+                      <button className="posts__comment-delete">Delete</button>
+                    </span>
+                  )}
+                </div>
+              ))
+            ) : (
+              <div className="posts__comment posts__comment--empty">No comments yet.</div>
+            )}
+            <div className="posts__comment-input-group">
+              <input
+                type="text"
+                placeholder="Write a comment..."
+                className="posts__comment-input"
+                value={commentInputs[post.postId] || ''}
+                onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.postId]: e.target.value }))}
+              />
+              <button onClick={() => handleAddComment(post.postId)} className="posts__comment-submit">Post</button>
+            </div>
           </div>
         </div>
       ))}

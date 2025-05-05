@@ -174,7 +174,7 @@ export default function LearningProgressPosts() {
                     <div className="learning-progress__name-line">
                       <h6 className="learning-progress__user-name">{user?.name}</h6>
                       <div className="learning-progress__skill-badge" style={{ backgroundColor: `${skillColor}20`, color: skillColor }}>
-                        {post.skill}
+                        {post?.skill}
                       </div>
                     </div>
                     <div className="learning-progress__timestamp">{post?.timestamp}</div>
@@ -200,7 +200,7 @@ export default function LearningProgressPosts() {
               
               <div className="learning-progress__body">
                 <div className="learning-progress__level" style={{ color: levelInfo.color }}>
-                  {post.level}
+                  {post?.level}
                 </div>
                 
                 <div className="learning-progress__progress-container">
