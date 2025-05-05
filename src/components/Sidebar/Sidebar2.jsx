@@ -7,11 +7,7 @@ import { UserContext } from '../../common/UserContext';
 export default function Sidebar2() {
 
   const {user} = useContext(UserContext);
-    const recommendedUsers = [
-        { id: 1, name: 'Sarah Parker', image: profileImg, skills: ['Photography', 'Editing'] },
-        { id: 2, name: 'David Kim', image: profileImg, skills: ['Cooking', 'Baking'] },
-        { id: 3, name: 'Alex Johnson', image: profileImg, skills: ['Web Dev', 'UX Design'] }
-      ];
+   
     
       const popularSkills = [
         { id: 1, name: 'Web Development', icon: 'fa-code' },
@@ -32,14 +28,14 @@ export default function Sidebar2() {
           <div className="user-profile p-3 border-bottom">
             <div className="d-flex align-items-center mb-3">
               <img 
-                src={user.imgUrl} 
+                src={user?.imgUrl } 
                 alt="Profile" 
                 className="rounded-circle me-3"
                 width={50}
               />
               <div>
-                <h6 className="mb-0">{user.name}</h6>
-                <small className="text-muted">{user.username}</small>
+                <h6 className="mb-0">{user?.name}</h6>
+                <small className="text-muted">{user?.username}</small>
               </div>
             </div>
             
@@ -64,15 +60,15 @@ export default function Sidebar2() {
             {userSkills.map(skill => (
               <div key={skill.id} className="mb-3">
                 <div className="d-flex justify-content-between mb-1">
-                  <small>{skill.name}</small>
-                  <small>{skill.progress}%</small>
+                  <small>{skill?.name}</small>
+                  <small>{skill?.progress}%</small>
                 </div>
                 <div className="progress" style={{ height: '6px' }}>
                   <div 
                     className="progress-bar bg-primary" 
                     role="progressbar" 
-                    style={{ width: `${skill.progress}%` }}
-                    aria-valuenow={skill.progress} 
+                    style={{ width: `${skill?.progress}%` }}
+                    aria-valuenow={skill?.progress} 
                     aria-valuemin="0" 
                     aria-valuemax="100">
                   </div>
@@ -88,10 +84,10 @@ export default function Sidebar2() {
             <h6 className="mb-3">Popular Skills</h6>
             <ul className="list-group list-group-flush">
               {popularSkills.map(skill => (
-                <li key={skill.id} className="list-group-item px-0 py-2 border-0">
-                  <Link to={`/skills/${skill.id}`} className="text-decoration-none text-dark">
-                    <i className={`fas ${skill.icon} me-2 text-primary`}></i>
-                    {skill.name}
+                <li key={skill?.id} className="list-group-item px-0 py-2 border-0">
+                  <Link to={`/skills/${skill?.id}`} className="text-decoration-none text-dark">
+                    <i className={`fas ${skill?.icon} me-2 text-primary`}></i>
+                    {skill?.name}
                   </Link>
                 </li>
               ))}
