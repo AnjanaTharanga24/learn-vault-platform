@@ -106,20 +106,30 @@ export default function SkillPostFeed({ editable = false }) {
     }
   };
 
-  const handleEditComment = (postId, commentId, existingComment) => {
+  const handleEditComment = async (postId, commentId, existingComment) => {
     setEditComment(existingComment);
     setEditCommentId(commentId);
     setEditPostId(postId);
     setShowEditModal(true);
+
+    // const id = user?.id;
+    // try {
+    //   const response = await axios.put(`http://localhost:8080/api/v1/comment?postId=${postId}&userId=${id}&commentId=${commentId}`,{
+    //     comment:""
+    //   });
+    //   console.log(response, "comment updated");
+    // } catch (e) {
+    //   console.log(e, "comment update error")
+    // }
+
   };
 
   const handleSaveEditedComment = async () => {
+
+    const id = user?.id;
     try {
-      await axios.put(`http://localhost:8080/api/v1/comment`, {
-        postId: editPostId,
-        commentId: editCommentId,
-        userId: user?.id,
-        updatedComment: editComment
+      await axios.put(`http://localhost:8080/api/v1/comment?postId=${editPostId}&userId=${id}&commentId=${editCommentId}`, {
+        comment: editComment
       });
       setShowEditModal(false);
       setEditComment('');
@@ -239,7 +249,7 @@ export default function SkillPostFeed({ editable = false }) {
                 onClick={() => handleAddComment(post.postId)}
                 className="posts__comment-submit"
               >
-                Post
+                Comment
               </button>
             </div>
           </div>
