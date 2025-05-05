@@ -6,8 +6,8 @@ import deleteIcon from '../../../assets/images/delete.png';
 import axios from 'axios';
 import { UserContext } from '../../../common/UserContext';
 import Modal from 'react-bootstrap/Modal';
-import './skillPostFeed.css';
 import Button from 'react-bootstrap/Button';
+import './skillPostFeed.css';
 
 export default function SkillPostFeed({ editable = false }) {
   const [posts, setPosts] = useState([]);
@@ -17,7 +17,7 @@ export default function SkillPostFeed({ editable = false }) {
   const [showModal, setShowModal] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [currentPostMedia, setCurrentPostMedia] = useState([]);
-  const [commentInputs, setCommentInputs] = useState('');
+  const [commentInputs, setCommentInputs] = useState({});
   const [editComment, setEditComment] = useState('');
   const [editCommentId, setEditCommentId] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -25,20 +25,20 @@ export default function SkillPostFeed({ editable = false }) {
 
   const API_BASE_URL = 'http://localhost:8080/api/v1/';
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(API_BASE_URL + 'feed');
-        setPosts(response.data);
-      } catch (err) {
-        console.error('Error fetching posts:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get(API_BASE_URL + 'feed');
+      setPosts(response.data);
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchPosts();
   }, []);
 
@@ -88,11 +88,13 @@ export default function SkillPostFeed({ editable = false }) {
     try {
       const response = await axios.post(`http://localhost:8080/api/v1/comment?postId=${postId}`, {
         userId: id,
-        comment: commentInputs
+        comment: commentInputs[postId] || ''
       });
-      console.log(response, "comment added");
+      console.log(response, 'comment added');
+      fetchPosts();
+      setCommentInputs(prev => ({ ...prev, [postId]: '' }));
     } catch (e) {
-      console.log(e, "comment add error")
+      console.log(e, 'comment add error');
     }
   };
 
@@ -100,41 +102,32 @@ export default function SkillPostFeed({ editable = false }) {
     const id = user?.id;
     try {
       const response = await axios.delete(`http://localhost:8080/api/v1/comment?postId=${postId}&userId=${id}&commentId=${commentId}`);
-      console.log(response, "comment deleted");
+      console.log(response, 'comment deleted');
+      fetchPosts();
     } catch (e) {
-      console.log(e, "comment delete error")
+      console.log(e, 'comment delete error');
     }
   };
 
-  const handleEditComment = async (postId, commentId, existingComment) => {
+  const handleEditComment = (postId, commentId, existingComment) => {
     setEditComment(existingComment);
     setEditCommentId(commentId);
     setEditPostId(postId);
     setShowEditModal(true);
-
-    // const id = user?.id;
-    // try {
-    //   const response = await axios.put(`http://localhost:8080/api/v1/comment?postId=${postId}&userId=${id}&commentId=${commentId}`,{
-    //     comment:""
-    //   });
-    //   console.log(response, "comment updated");
-    // } catch (e) {
-    //   console.log(e, "comment update error")
-    // }
-
   };
 
   const handleSaveEditedComment = async () => {
 
-    const id = user?.id;
+    const id = user?.id
     try {
-      await axios.put(`http://localhost:8080/api/v1/comment?postId=${editPostId}&userId=${id}&commentId=${editCommentId}`, {
-        comment: editComment
+      await axios.put(`http://localhost:8080/api/v1/comment?postId=${editPostId}&userId=${id}&commentId=${editCommentId}`,{
+        comment:editComment
       });
       setShowEditModal(false);
       setEditComment('');
+      fetchPosts();
     } catch (e) {
-      console.log(e, "edit comment error");
+      console.log(e, 'edit comment error');
     }
   };
 
@@ -222,88 +215,43 @@ export default function SkillPostFeed({ editable = false }) {
             {renderPostMedia(post)}
           </div>
 
-          <div className="posts__comments">
+          <div className="posts__comments styled-comments">
             {post.comments?.length > 0 ? (
               post.comments.map((c, i) => (
-                <div key={i} className="posts__comment">
-                  <strong>{c?.user.name}:</strong> {c?.comment}
+                <div key={i} className="styled-comment">
+                  <div className="comment-user">
+                    <strong>{c?.user.name}</strong>
+                    <span className="comment-text">{c?.comment}</span>
+                  </div>
                   {c?.user.id === user.id && (
-                    <span className="posts__comment-actions">
-                      <button className="posts__comment-edit" onClick={() => handleEditComment(post.postId, c.commentId, c.comment)}>Edit</button>
-                      <button className="posts__comment-delete" onClick={() => handleDeleteComment(post.postId, c.commentId)}>Delete</button>
-                    </span>
+                    <div className="comment-actions">
+                      <button onClick={() => handleEditComment(post.postId, c.commentId, c.comment)}>Edit</button>
+                      <button onClick={() => handleDeleteComment(post.postId, c.commentId)}>Delete</button>
+                    </div>
                   )}
                 </div>
               ))
             ) : (
               <div className="posts__comment posts__comment--empty">No comments yet.</div>
             )}
-            <div className="posts__comment-input-group">
+            <div className="posts__comment-input-group styled-input-group">
               <input
                 type="text"
                 placeholder="Write a comment..."
-                className="posts__comment-input"
-                onChange={(e) => setCommentInputs(e.target.value)}
+                className="styled-comment-input"
+                value={commentInputs[post.postId] || ''}
+                onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.postId]: e.target.value }))}
               />
               <button
                 onClick={() => handleAddComment(post.postId)}
-                className="posts__comment-submit"
+                className="styled-comment-submit"
               >
-                Comment
+                Post
               </button>
             </div>
           </div>
         </div>
       ))}
-
-      {showModal && (
-        <div className="posts__modal">
-          <div className="posts__modal-overlay" onClick={() => setShowModal(false)}></div>
-          <div className="posts__modal-content">
-            <button
-              className="posts__modal-close"
-              onClick={() => setShowModal(false)}
-              aria-label="Close modal"
-            >
-              &times;
-            </button>
-
-            <div className="posts__modal-media-container">
-              {isVideo(currentPostMedia[currentMediaIndex]) ? (
-                <video
-                  controls
-                  autoPlay
-                  className="posts__modal-media"
-                  playsInline
-                  key={currentPostMedia[currentMediaIndex]}
-                >
-                  <source src={currentPostMedia[currentMediaIndex]} type="video/mp4" />
-                </video>
-              ) : (
-                <img
-                  src={currentPostMedia[currentMediaIndex]}
-                  alt="Media preview"
-                  className="posts__modal-media"
-                />
-              )}
-            </div>
-
-            {currentPostMedia.length > 1 && (
-              <div className="posts__modal-navigation">
-                <button className="posts__nav-button posts__nav-button--prev" onClick={handlePrev}>
-                  &lt;
-                </button>
-                <div className="posts__media-counter">
-                  {currentMediaIndex + 1} / {currentPostMedia.length}
-                </div>
-                <button className="posts__nav-button posts__nav-button--next" onClick={handleNext}>
-                  &gt;
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       <Modal show={showEditModal} onHide={() => setShowEditModal(false)} centered>
         <Modal.Header closeButton>

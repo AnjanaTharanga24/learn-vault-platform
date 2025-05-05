@@ -1,5 +1,5 @@
-/* Comment Section Container */
-.posts__comments {
+/* Comments Container */
+.posts__comments.styled-comments {
     margin-top: 1.5rem;
     border-top: 1px solid #e0e0e0;
     padding: 1.25rem;
@@ -10,60 +10,71 @@
   }
   
   /* Individual Comment */
-  .posts__comment {
+  .styled-comment {
     padding: 12px 16px;
     border-radius: 10px;
     margin-bottom: 12px;
     background-color: #fff;
     display: flex;
-    flex-wrap: wrap;
+    justify-content: space-between;
     align-items: flex-start;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    position: relative;
   }
   
-  .posts__comment:hover {
+  .styled-comment:hover {
     transform: translateY(-2px);
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
   }
   
+  /* User name and comment text container */
+  .comment-user {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  
   /* User Name Styling */
-  .posts__comment strong {
+  .comment-user strong {
     margin-right: 8px;
     color: #2c3e50;
     font-weight: 600;
   }
   
   /* Comment Text */
-  .posts__comment p {
-    margin: 0;
+  .comment-text {
     color: #4a5568;
     line-height: 1.5;
-    flex: 1;
-    width: calc(100% - 120px); /* Provide space for the action buttons */
+  }
+  
+  /* Empty Comment State */
+  .posts__comment--empty {
+    text-align: center;
+    padding: 16px;
+    color: #a0aec0;
+    font-style: italic;
+    background-color: transparent;
+    box-shadow: none;
   }
   
   /* Action Buttons Container */
-  .posts__comment-actions {
-    margin-left: auto;
+  .comment-actions {
     display: flex;
     gap: 8px;
-    opacity: 0.7;
+    opacity: 0.8;
     transition: opacity 0.2s ease;
-    align-self: flex-start;
+    margin-left: auto;
   }
   
-  .posts__comment:hover .posts__comment-actions {
+  .styled-comment:hover .comment-actions {
     opacity: 1;
   }
   
   /* Action Buttons */
-  .posts__comment-edit,
-  .posts__comment-delete {
+  .comment-actions button {
     background: none;
     border: none;
-    color: #4299e1;
     font-size: 0.85rem;
     cursor: pointer;
     padding: 4px 6px;
@@ -72,90 +83,129 @@
     white-space: nowrap;
   }
   
-  .posts__comment-edit:hover {
+  .comment-actions button:first-child {
+    color: #4299e1;
+  }
+  
+  .comment-actions button:first-child:hover {
     background-color: rgba(66, 153, 225, 0.1);
     color: #2b6cb0;
   }
   
-  .posts__comment-delete {
+  .comment-actions button:last-child {
     color: #e53e3e;
   }
   
-  .posts__comment-delete:hover {
+  .comment-actions button:last-child:hover {
     background-color: rgba(229, 62, 62, 0.1);
     color: #c53030;
   }
   
   /* New Comment Input Group */
-  .posts__comment-input-group {
+  .posts__comment-input-group.styled-input-group {
     display: flex;
     margin-top: 16px;
     position: relative;
   }
   
   /* Comment Input */
-  .posts__comment-input {
+  .styled-comment-input {
     flex: 1;
     padding: 12px 14px;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    border-radius: 8px 0 0 8px;
     font-size: 0.95rem;
     color: #4a5568;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
     outline: none;
   }
   
-  .posts__comment-input:focus {
+  .styled-comment-input:focus {
     border-color: #4299e1;
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
   }
   
-  .posts__comment-input::placeholder {
+  .styled-comment-input::placeholder {
     color: #a0aec0;
   }
   
   /* Submit Button */
-  .posts__comment-submit {
-    margin-left: 8px;
+  .styled-comment-submit {
     padding: 10px 16px;
     background-color: #3182ce;
     border: none;
     color: white;
-    border-radius: 8px;
+    border-radius: 0 8px 8px 0;
     cursor: pointer;
     font-weight: 500;
     transition: background-color 0.2s ease, transform 0.1s ease;
     box-shadow: 0 2px 4px rgba(49, 130, 206, 0.2);
   }
   
-  .posts__comment-submit:hover {
+  .styled-comment-submit:hover {
     background-color: #2c5282;
   }
   
-  .posts__comment-submit:active {
+  .styled-comment-submit:active {
     transform: scale(0.98);
   }
   
-  /* Comment Timestamps */
-  .posts__comment-time {
-    font-size: 0.75rem;
-    color: #a0aec0;
-    margin-left: 8px;
+  /* Modal Styling */
+  .modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   }
   
-  /* Empty State */
-  .posts__comments-empty {
-    text-align: center;
-    padding: 24px 0;
-    color: #a0aec0;
-    font-style: italic;
+  .modal-header {
+    border-bottom: 1px solid #e2e8f0;
+    padding: 16px 20px;
   }
   
-  /* Comment Count */
-  .posts__comments-count {
-    font-size: 0.9rem;
-    color: #718096;
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 1px dashed #e2e8f0;
+  .modal-title {
+    font-weight: 600;
+    color: #2d3748;
+  }
+  
+  .modal-body {
+    padding: 20px;
+  }
+  
+  .modal-body textarea {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+  
+  .modal-body textarea:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+    outline: none;
+  }
+  
+  .modal-footer {
+    border-top: 1px solid #e2e8f0;
+    padding: 16px 20px;
+  }
+  
+  /* Bootstrap Button Overrides */
+  .btn-secondary {
+    background-color: #e2e8f0;
+    border: none;
+    color: #4a5568;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #cbd5e0;
+  }
+  
+  .btn-primary {
+    background-color: #3182ce;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    background-color: #2c5282;
   }
