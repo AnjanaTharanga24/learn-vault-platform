@@ -153,11 +153,11 @@ console.log(user,"newwwwwwwwwwwwwwwwwwwwww")
             <small className="text-muted">Posts</small>
           </div>
           <div>
-            <div className="fw-bold">{user?.followers?.length} </div>
+            <div className="fw-bold">{user?.followerCount} </div>
             <small className="text-muted">Followers</small>
           </div>
           <div>
-            <div className="fw-bold">{user?.following?.length}</div>
+            <div className="fw-bold">{user?.followingCount}</div>
             <small className="text-muted">Following</small>
           </div>
         </div>
