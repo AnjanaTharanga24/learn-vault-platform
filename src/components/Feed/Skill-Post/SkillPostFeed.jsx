@@ -23,6 +23,8 @@ export default function SkillPostFeed({ editable = false }) {
   const [editCommentId, setEditCommentId] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editPostId, setEditPostId] = useState(null);
+  const [likedPosts, setLikedPosts] = useState({});
+  const [likeCounts, setLikeCounts] = useState({});
 
   const API_BASE_URL = 'http://localhost:8080/api/v1/';
 
@@ -31,6 +33,14 @@ export default function SkillPostFeed({ editable = false }) {
       setLoading(true);
       const response = await axios.get(API_BASE_URL + 'feed');
       setPosts(response.data);
+      const likeData = {};
+      const countData = {};
+      response.data.forEach(post => {
+        likeData[post.postId] = post.likedBy?.includes(user?.id);
+        countData[post.postId] = post.likesCount || 0;
+      });
+      setLikedPosts(likeData);
+      setLikeCounts(countData);
     } catch (err) {
       console.error('Error fetching posts:', err);
       setError(err.message);
@@ -62,9 +72,9 @@ export default function SkillPostFeed({ editable = false }) {
     setCurrentMediaIndex(prev => (prev > 0 ? prev - 1 : currentPostMedia.length - 1));
   };
 
-  const handleNext = () => {
-    setCurrentMediaIndex(prev => (prev < currentPostMedia.length - 1 ? prev + 1 : 0));
-  };
+  // const handleNext = () => {
+  //   setCurrentMediaIndex(prev => (prev < currentPostMedia.length - 1 ? prev + 1 : 0));
+  // };
 
   const handleDelete = async (postId) => {
     if (window.confirm('Are you sure you want to delete this post?')) {
@@ -128,6 +138,21 @@ export default function SkillPostFeed({ editable = false }) {
       fetchPosts();
     } catch (e) {
       console.log(e, 'edit comment error');
+    }
+  };
+
+  //handle like
+  const handleLike = async (postId) => {
+    const userId = user?.id;
+    try {
+      await axios.post(`http://localhost:8080/api/v1/like?postId=${postId}&userId=${userId}`);
+      setLikedPosts(prev => ({ ...prev, [postId]: !prev[postId] }));
+      setLikeCounts(prev => ({
+        ...prev,
+        [postId]: prev[postId] + (likedPosts[postId] ? -1 : 1)
+      }));
+    } catch (err) {
+      console.error('Error liking post:', err);
     }
   };
 
@@ -216,8 +241,8 @@ export default function SkillPostFeed({ editable = false }) {
           </div>
 
           <div className="posts__actions enhanced-actions">
-            <button className="posts__action-btn">
-              <FaThumbsUp /> Like
+          <button className={`posts__action-btn ${likedPosts[post.postId] ? 'liked' : ''}`} onClick={() => handleLike(post.postId)}>
+              <FaThumbsUp style={{ color: likedPosts[post.postId] ? 'blue' : 'inherit' }} /> {likedPosts[post.postId] ? 'Liked' : 'Like'} 
             </button>
             <button className="posts__action-btn">
               <FaCommentDots /> Comment
