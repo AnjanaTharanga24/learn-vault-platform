@@ -9,14 +9,15 @@ import Signup from './pages/Auth/Signup';
 import { UserProvider } from './common/UserContext';
 import UserProfile from './pages/User-Profile/UserProfile';
 import FollowUsers from './pages/Follow-Users/FollowUsers';
+import MotivationPopup from './common/MotivationPopup';
 
 function App() {
   return (
     <UserProvider>
+    <MotivationPopup/>
     <div className="App">
       <Router>
         <Routes>
-          
           <Route path="/" element={<Login/>} />
           <Route path="/home" element={<Home/>} />
           <Route path="/register" element={<Signup/>} />
