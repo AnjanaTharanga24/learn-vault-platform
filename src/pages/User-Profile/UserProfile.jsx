@@ -15,23 +15,10 @@ function UserProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const { user, setUser } = useContext(UserContext);
   const [error, setError] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [getUser , setGetUser] = useState();
-
-  useEffect(() => {
-    getUserById();
-  }, []);
-
-  const getUserById = async () => {
-    try {
-      const response = await axios.get(`http://localhost:8080/api/v1/user/${user.id}`);
-      setGetUser(response.data);
-      console.log("get user by id : " , response.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  
   const [formData, setFormData] = useState({
     name: "",
     username: "",
@@ -39,19 +26,32 @@ function UserProfile() {
     password: "",
     imgUrl: ""
   });
-  
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || "",
-        username: user.username || "",
-        email: user.email || "",
-        password: "",
-        imgUrl: user.imgUrl || ""
-      });
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8080/api/v1/user/${user.id}`);
+        setCurrentUser(response.data);
+        setFormData({
+          name: response.data.name || "",
+          username: response.data.username || "",
+          email: response.data.email || "",
+          password: "",
+          imgUrl: response.data.imgUrl || ""
+        });
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        Swal.fire({
+          title: 'Error!',
+          text: 'Failed to load user data',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    };
+
+    if (user && user.id) {
+      fetchUserData();
     }
   }, [user]);
 
@@ -82,50 +82,72 @@ function UserProfile() {
     setError("");
     
     try {
-      let imageUrl = user.imgUrl;
+      let imageUrl = currentUser.imgUrl;
       
       if (selectedImage) {
         imageUrl = await uploadToCloudinary(selectedImage, "image");
       }
       
-      const updateData = {
-        name: formData.name,
-        username: formData.username,
-        email: formData.email,
-        imgUrl: imageUrl
-      };
+      // Only include fields that have changed
+      const updateData = {};
+      
+      if (formData.name !== currentUser.name) {
+        updateData.name = formData.name;
+      }
+      
+      if (formData.username !== currentUser.username) {
+        updateData.username = formData.username;
+      }
+      
+      if (formData.email !== currentUser.email) {
+        updateData.email = formData.email;
+      }
+      
+      if (selectedImage) {
+        updateData.imgUrl = imageUrl;
+      }
       
       if (formData.password && formData.password.trim() !== "") {
         updateData.password = formData.password;
       }
-
-      const response = await axios.put(
-        `http://localhost:8080/api/v1/user/update/${user.id}`,
-        updateData,
-      );
-      
-      setUser({
-        ...user,
-        name: response.data.name,
-        username: response.data.username,
-        email: response.data.email,
-        imgUrl: response.data.imgUrl
-      });
-      
-      setIsEditing(false);
-      
-      Swal.fire({
-        title: 'Success!',
-        text: 'Profile updated successfully!',
-        icon: 'success',
-        confirmButtonText: 'OK'
-      });
+  
+      // Only proceed with update if there are actual changes
+      if (Object.keys(updateData).length > 0) {
+        const response = await axios.put(
+          `http://localhost:8080/api/v1/user/update/${user.id}`,
+          updateData
+        );
+        
+        // Update both context and local state
+        setUser({
+          ...user,
+          ...response.data
+        });
+        
+        setCurrentUser(response.data);
+        setIsEditing(false);
+        
+        Swal.fire({
+          title: 'Success!',
+          text: 'Profile updated successfully!',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
+      } else {
+        setIsEditing(false);
+        Swal.fire({
+          title: 'No changes',
+          text: 'No changes were made to your profile',
+          icon: 'info',
+          confirmButtonText: 'OK'
+        });
+      }
     } catch (error) {
       console.error("Error updating profile:", error);
       
       let errorMessage = "Failed to update profile. Please try again.";
       if (error.response && error.response.data) {
-        errorMessage = error.response.data.message || error.response.data || errorMessage;
+        errorMessage = error.response.data.message || errorMessage;
       } else if (error.message) {
         errorMessage = error.message;
       }
@@ -142,7 +164,7 @@ function UserProfile() {
       setIsLoading(false);
     }
   };
-
+  
   const handleCancel = () => {
     Swal.fire({
       title: 'Are you sure?',
@@ -155,26 +177,20 @@ function UserProfile() {
     }).then((result) => {
       if (result.isConfirmed) {
         setFormData({
-          name: user.name || "",
-          username: user.username || "",
-          email: user.email || "",
+          name: currentUser.name || "",
+          username: currentUser.username || "",
+          email: currentUser.email || "",
           password: "",
-          imgUrl: user.imgUrl || ""
+          imgUrl: currentUser.imgUrl || ""
         });
         setSelectedImage(null);
         setError("");
         setIsEditing(false);
-        
-        Swal.fire(
-          'Changes discarded!',
-          'Your profile edit has been canceled.',
-          'success'
-        );
       }
     });
   };
 
-  if (!user || !user.id) {
+  if (!currentUser) {
     return (
       <div className="loading">
         <div className="spinner-border text-primary" role="status">
@@ -220,7 +236,7 @@ function UserProfile() {
                     <div className="profile-image-wrapper edit-mode">
                       <img
                         id="profileImagePreview"
-                        src={user.imgUrl || "https://via.placeholder.com/150"}
+                        src={formData.imgUrl || "https://via.placeholder.com/150"}
                         alt="Profile"
                         className="profile-image"
                       />
@@ -318,15 +334,15 @@ function UserProfile() {
                     <div className="profile-top">
                       <div className="profile-image-wrapper">
                         <img
-                          src={getUser?.imgUrl}
+                          src={currentUser.imgUrl || "https://via.placeholder.com/150"}
                           alt="Profile"
                           className="profile-image"
                         />
                       </div>
                       <div className="profile-info">
-                        <h2 className="user-name">{user.name}</h2>
-                        <p className="username">@{user.username}</p>
-                        <p className="email">{user.email}</p>
+                        <h2 className="user-name">{currentUser.name}</h2>
+                        <p className="username">@{currentUser.username}</p>
+                        <p className="email">{currentUser.email}</p>
                       </div>
                     </div>
                   </div>
