@@ -156,6 +156,8 @@ export default function SkillPostFeed({ editable = false }) {
     }
   };
 
+  console.log(posts,"ppppppppppppppp")
+
   const renderPostMedia = (post) => {
     const mediaItems = [
       ...(post.videoUrl ? [post.videoUrl] : []),
@@ -225,13 +227,13 @@ export default function SkillPostFeed({ editable = false }) {
 
           <div className="posts__header">
             <img 
-              src={post.user?.profilePicture || profileImg} 
-              alt={post.username} 
+              src={post.user?.imgUrl || profileImg} 
+              alt={post.user?.username} 
               className="posts__profile-pic" 
             />
             <div className="posts__user-info">
-              <h6 className="posts__user-name">{post.username}</h6>
-              <small className="posts__meta">{post.postDate}</small>
+              <h6 className="posts__user-name">{post.user?.username}</h6>
+              <small className="posts__meta">{new Date(post?.postDate).toLocaleString()}</small>
             </div>
           </div>
 
