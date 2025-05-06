@@ -14,7 +14,7 @@ import MotivationPopup from './common/MotivationPopup';
 function App() {
   return (
     <UserProvider>
-    <MotivationPopup/>
+    {/* <MotivationPopup/> */}
     <div className="App">
       <Router>
         <Routes>
