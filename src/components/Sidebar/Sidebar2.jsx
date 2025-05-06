@@ -13,6 +13,8 @@ export default function Sidebar2() {
 
   const [getUser , setGetUser] = useState();
 
+  
+  
   useEffect(() => {
     getUserById();
   }, []);
@@ -26,20 +28,7 @@ export default function Sidebar2() {
       console.error(err);
     }
   };
-
-  const recommendedUsers = [
-    { id: 1, name: 'Sarah Parker', image: profileImg, skills: ['Photography', 'Editing'] },
-    { id: 2, name: 'David Kim', image: profileImg, skills: ['Cooking', 'Baking'] },
-    { id: 3, name: 'Alex Johnson', image: profileImg, skills: ['Web Dev', 'UX Design'] }
-  ];
-
-  const popularSkills = [
-    { id: 1, name: 'Web Development', icon: 'fa-code' },
-    { id: 2, name: 'Photography', icon: 'fa-camera' },
-    { id: 3, name: 'Cooking', icon: 'fa-utensils' },
-    { id: 4, name: 'Graphic Design', icon: 'fa-palette' },
-    { id: 5, name: 'Digital Marketing', icon: 'fa-chart-line' }
-  ];
+console.log(user,"newwwwwwwwwwwwwwwwwwwwww")
 
   useEffect(() => {
     if (!user?.id) return;
@@ -160,15 +149,15 @@ export default function Sidebar2() {
         
         <div className="d-flex justify-content-around text-center">
           <div>
-            <div className="fw-bold">0</div>
+            <div className="fw-bold">3</div>
             <small className="text-muted">Posts</small>
           </div>
           <div>
-            <div className="fw-bold">0</div>
+            <div className="fw-bold">{user?.followers?.length} </div>
             <small className="text-muted">Followers</small>
           </div>
           <div>
-            <div className="fw-bold">0</div>
+            <div className="fw-bold">{user?.following?.length}</div>
             <small className="text-muted">Following</small>
           </div>
         </div>

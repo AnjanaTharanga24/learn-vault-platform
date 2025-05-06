@@ -232,7 +232,7 @@ export default function SkillPostFeed({ editable = false }) {
               className="posts__profile-pic" 
             />
             <div className="posts__user-info">
-              <h6 className="posts__user-name">{post.user?.username}</h6>
+              <h5 className="posts__user-name">{post.user?.username}</h5>
               <small className="posts__meta">{new Date(post?.postDate).toLocaleString()}</small>
             </div>
           </div>
