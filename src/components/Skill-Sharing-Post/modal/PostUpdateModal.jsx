@@ -20,8 +20,8 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
       setDescription(post.description || '');
       setImages(post.imageUrls ? post.imageUrls.map(url => ({ url })) : []);
       setVideo(post.videoUrl ? { url: post.videoUrl } : null);
-    } else {
-      // Reset when modal closes
+    } else if (!show) {
+
       setDescription('');
       setImages([]);
       setVideo(null);
@@ -64,6 +64,10 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
   };
 
   const handleVideoUpload = async (event) => {
+    if (!event.target.files || event.target.files.length === 0) {
+      return;
+    }
+    
     try {
       setIsLoading(true);
       const videoUrl = await uploadToCloudinary(event.target.files[0], "video");
@@ -92,7 +96,7 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
 
       const response = await axios.put(
         `http://localhost:8080/api/v1/post/${post.postId}`,
-        { ...postData, userId: user.id } 
+        postData
       );
       
       Swal.fire({
@@ -128,8 +132,8 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
     try {
       setIsLoading(true);
       const updatedPost = await updatePost();
-      handleClose();
       if (onPostUpdated) onPostUpdated(updatedPost);
+      handleClose();
     } catch (error) {
       console.error('Error updating post:', error);
     } finally {
@@ -172,6 +176,7 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
                 style={{ width: '100px', height: '100px', objectFit: 'cover' }}
               />
               <button 
+                type="button"
                 className="btn btn-danger btn-sm position-absolute top-0 end-0"
                 onClick={() => removeImage(index)}
                 disabled={isLoading}
@@ -190,6 +195,7 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
                 controls
               />
               <button 
+                type="button"
                 className="btn btn-danger btn-sm position-absolute top-0 end-0"
                 onClick={removeVideo}
                 disabled={isLoading}
@@ -211,6 +217,7 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
                   disabled={isLoading}
                 />
                 <button 
+                  type="button"
                   className="btn btn-outline-secondary"
                   onClick={() => imageInputRef.current.click()}
                   disabled={isLoading}
@@ -232,6 +239,7 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
                   disabled={isLoading}
                 />
                 <button 
+                  type="button"
                   className="btn btn-outline-secondary"
                   onClick={() => videoInputRef.current.click()}
                   disabled={isLoading}
@@ -246,6 +254,7 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
       </Modal.Body>
       <Modal.Footer>
         <button 
+          type="button"
           className="btn btn-secondary me-2"
           onClick={handleClose}
           disabled={isLoading}
@@ -253,6 +262,7 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
           Cancel
         </button>
         <button 
+          type="button"
           className="btn btn-primary"
           onClick={handleSubmit}
           disabled={!description.trim() || isLoading}
