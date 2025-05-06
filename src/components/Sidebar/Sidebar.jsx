@@ -203,9 +203,9 @@ export default function Sidebar() {
                         </li>
                     ))}
                 </ul>
-                <Link to="/explore-skills" className="btn btn-outline-primary btn-sm w-100 mt-2">
+                {/* <Link to="/explore-skills" className="btn btn-outline-primary btn-sm w-100 mt-2">
                     Explore More Skills
-                </Link>
+                </Link> */}
             </div>
             
             <div className="p-3">

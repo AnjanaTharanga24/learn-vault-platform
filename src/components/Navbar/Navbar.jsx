@@ -80,14 +80,11 @@ export default function Navbar() {
               </Link>
             </li>
             <li className="nav-item px-2">
-              <Link className="nav-link" to="/skills">
                 <i className="fas fa-lightbulb fs-4"></i>
-              </Link>
             </li>
             <li className="nav-item px-2">
-              <Link className="nav-link" to="/learning-plans">
                 <i className="fas fa-book fs-4"></i>
-              </Link>
+              
             </li>
 
             <li className="nav-item px-2">
