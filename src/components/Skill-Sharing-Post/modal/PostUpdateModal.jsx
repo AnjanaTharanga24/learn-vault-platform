@@ -84,18 +84,19 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
       event.target.value = ''; // Reset file input
     }
   };
-
+  
   const updatePost = async () => {
+
+    const userId = user?.id
     try {
       const postData = {
         description,
         imageUrls: images.map(img => img.url),
         videoUrl: video?.url || null,
-        userId: user.id
       };
 
       const response = await axios.put(
-        `http://localhost:8080/api/v1/post/${post.postId}`,
+        `http://localhost:8080/api/v1/post?postId=${post.postId}&userId=${userId}`,
         postData
       );
       
@@ -167,7 +168,7 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
         ></textarea>
         
         <div className="upload-preview d-flex flex-wrap mb-3">
-          {images.map((image, index) => (
+          {images?.map((image, index) => (
             <div key={index} className="position-relative me-2 mb-2">
               <img 
                 src={image.url} 
@@ -189,7 +190,7 @@ export default function PostUpdateModal({ show, handleClose, post, onPostUpdated
           {video && (
             <div className="position-relative me-2 mb-2">
               <video 
-                src={video.url} 
+                src={video?.url} 
                 className="img-thumbnail"
                 style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                 controls
