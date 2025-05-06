@@ -17,9 +17,11 @@ export default function LearningPlanPostFeed() {
   const [editCommentId, setEditCommentId] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editPlanId, setEditPlanId] = useState(null);
+  const [likedPlans, setLikedPlans] = useState({});
 
   useEffect(() => {
     getAllLearningPlans();
+    fetchUserLikes();
   }, []);
 
   const getAllLearningPlans = async () => {
@@ -76,6 +78,56 @@ export default function LearningPlanPostFeed() {
     } catch (err) {
       console.log(err);
       setLearningPlans([]);
+    }
+  };
+
+  const fetchUserLikes = async () => {
+    try {
+      const id = user?.id;
+      if (!id) return;
+      
+      // Fetch user's liked plans
+      const response = await axios.get(
+        `http://localhost:8080/api/v1/learning/likes/${id}`
+      );
+      
+      // Transform the API response into an object with plan IDs as keys
+      const likesMap = {};
+      response.data.forEach(likedPlan => {
+        likesMap[likedPlan.planId] = true;
+      });
+      
+      setLikedPlans(likesMap);
+    } catch (err) {
+      console.error("Error fetching user likes:", err);
+    }
+  };
+
+  const handleLike = async (planId) => {
+    const id = user?.id;
+    if (!id) return;
+    
+    try {
+      const isCurrentlyLiked = likedPlans[planId];
+      
+      // Optimistically update UI
+      setLikedPlans(prev => ({
+        ...prev,
+        [planId]: !isCurrentlyLiked
+      }));
+
+      // Make API call based on whether we're liking or unliking
+      if (!isCurrentlyLiked) {
+        // Unlike the plan
+        await axios.post(`http://localhost:8080/api/v1/learning/like?id=${planId}&userId=${id}`);
+      }
+    } catch (err) {
+      console.error('Error updating like:', err);
+      // Revert changes if API fails
+      setLikedPlans(prev => ({
+        ...prev,
+        [planId]: !prev[planId]
+      }));
     }
   };
 
@@ -213,9 +265,13 @@ console.log(learningPlans,"plaans")
             </div>
 
             <div className="learning-plan__footer">
-              <div className="learning-plan__action">
+              <div 
+                className="learning-plan__action"
+                onClick={() => handleLike(plan.id)}
+                style={{ color: likedPlans[plan.id] ? "#2ecc71" : "#555" }}
+              >
                 <FaThumbsUp />
-                <span>Like</span>
+                <span>{likedPlans[plan.id] ? "Liked" : "Like"}</span>
               </div>
               <div className="learning-plan__action">
                 <FaCommentDots />
