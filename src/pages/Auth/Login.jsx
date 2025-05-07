@@ -7,13 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { UserContext } from "../../common/UserContext";
 import googleIcon from "../../assets/images/google.png";
-import {
-  GoogleAuthProvider,
-  FacebookAuthProvider,
-  signInWithPopup,
-  OAuthProvider,
-  getAuth,
-} from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../components/utils/firebase.js";
 
 export default function Login() {
@@ -100,7 +94,7 @@ export default function Login() {
     signInWithPopup(auth, provider).then(async (result) => {
       try {
         const response = await axios.post(
-          "http://localhost:8083/api/v1/user/login-or-signup-by-oauth",
+          "http://localhost:8080/api/v1/user/login-or-signup-by-oauth",
           {
             name: result.user.displayName,
             email: result.user.email,
@@ -122,7 +116,7 @@ export default function Login() {
             showConfirmButton: false,
             timer: 2000,
           }).then(() => {
-            navigate("/");
+            navigate("/home");
           });
         } else if (response.data.userType === "new_user") {
           Swal.fire({
@@ -135,7 +129,7 @@ export default function Login() {
             showConfirmButton: false,
             timer: 2000,
           }).then(() => {
-            navigate("/");
+            navigate("/home");
           });
         }
       } catch (error) {
