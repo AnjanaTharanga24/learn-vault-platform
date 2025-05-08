@@ -110,7 +110,7 @@ export default function Navbar() {
                   </a>
                   <ul className="dropdown-menu dropdown-menu-end shadow">
                     <li><Link className="dropdown-item" to="/profile">My Profile</Link></li>
-                    <li><Link className="dropdown-item" to="/settings">Settings</Link></li>
+                    {/* <li><Link className="dropdown-item" to="/settings">Settings</Link></li> */}
                     <li><hr className="dropdown-divider" /></li>
                     <li>
                       <button 
