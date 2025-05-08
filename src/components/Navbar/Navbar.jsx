@@ -10,17 +10,19 @@ export default function Navbar() {
   const { user, logout } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const [getUser , setGetUser] = useState();
+  const [getUser, setGetUser] = useState();
 
   useEffect(() => {
-    getUserById();
-  }, []);
+    if (user) {
+      getUserById();
+    }
+  }, [user]);
 
   const getUserById = async () => {
     try {
       const response = await axios.get(`http://localhost:8080/api/v1/user/${user.id}`);
       setGetUser(response.data);
-      console.log("get user by id : " , response.data);
+      console.log("get user by id : ", response.data);
     } catch (err) {
       console.error(err);
     }
@@ -31,11 +33,10 @@ export default function Navbar() {
     console.log("Searching for:", searchQuery);
   };
 
-
-  if (!user) {
+  const handleLogout = () => {
+    logout();
     navigate("/");
-    return null;
-  }
+  };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
@@ -45,23 +46,25 @@ export default function Navbar() {
           <span className="fw-bold text-primary">SkillShare</span>
         </Link>
 
-        <form
-          className="d-none d-md-flex position-relative ms-4 flex-grow-1"
-          onSubmit={handleSubmit}
-        >
-          <div className="input-group">
-            <span className="input-group-text bg-light border-end-0">
-              <i className="fas fa-search text-muted"></i>
-            </span>
-            <input
-              type="text"
-              className="form-control bg-light border-start-0"
-              placeholder="Search skills, topics, or users"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </form>
+        {user && (
+          <form
+            className="d-none d-md-flex position-relative ms-4 flex-grow-1"
+            onSubmit={handleSubmit}
+          >
+            <div className="input-group">
+              <span className="input-group-text bg-light border-end-0">
+                <i className="fas fa-search text-muted"></i>
+              </span>
+              <input
+                type="text"
+                className="form-control bg-light border-start-0"
+                placeholder="Search skills, topics, or users"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          </form>
+        )}
 
         <button
           className="navbar-toggler"
@@ -74,18 +77,21 @@ export default function Navbar() {
 
         <div className="collapse navbar-collapse" id="navbarContent">
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
-            <li className="nav-item px-2">
-              <Link className="nav-link" to="/home">
-                <i className="fas fa-home fs-4"></i>
-              </Link>
-            </li>
-            <li className="nav-item px-2">
-                <i className="fas fa-lightbulb fs-4"></i>
-            </li>
-            <li className="nav-item px-2">
-                <i className="fas fa-book fs-4"></i>
-              
-            </li>
+            {user && (
+              <>
+                <li className="nav-item px-2">
+                  <Link className="nav-link" to="/home">
+                    <i className="fas fa-home fs-4"></i>
+                  </Link>
+                </li>
+                <li className="nav-item px-2">
+                  <i className="fas fa-lightbulb fs-4"></i>
+                </li>
+                <li className="nav-item px-2">
+                  <i className="fas fa-book fs-4"></i>
+                </li>
+              </>
+            )}
 
             <li className="nav-item px-2">
               {user ? (
@@ -115,7 +121,7 @@ export default function Navbar() {
                     <li>
                       <button 
                         className="dropdown-item" 
-                        onClick={logout}
+                        onClick={handleLogout}
                       >
                         Logout
                       </button>
